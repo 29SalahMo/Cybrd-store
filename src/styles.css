@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0a0a0a;
+  --bone: #EDE8E3;
+  --burgundy: #5A1B1E;
+  --neon: #00E5FF;
+  --magenta: #FF1177;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(0,229,255,0.18), transparent 60%),
+              radial-gradient(1000px 500px at 120% 20%, rgba(255,17,119,0.12), transparent 60%),
+              #0a0a0a;
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.neon-text {
+  text-shadow: 0 0 10px rgba(0,229,255,0.6), 0 0 20px rgba(0,229,255,0.3);
+}
+
+.magenta-text {
+  text-shadow: 0 0 10px rgba(255,17,119,0.55), 0 0 24px rgba(255,17,119,0.25);
+}
+
+.floating {
+  animation: floating 6s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+
