@@ -34,11 +34,6 @@ export default function Home() {
               ) : (
                 <img src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
               )}
-              {p.id !== 1 && p.id !== 2 && p.id !== 3 && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-bone/50 group-hover:text-neon transition">{p.name}</span>
-                </div>
-              )}
             </div>
             <div className="p-4 flex items-center justify-between">
               <div>
