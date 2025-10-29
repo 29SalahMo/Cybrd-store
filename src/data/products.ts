@@ -13,7 +13,7 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
   const id = i + 1
   return {
     id,
-    name: id === 1 ? 'Flame Angel' : id === 2 ? 'Skelton' : id === 3 ? 'Rhuds' : id === 4 ? 'Vampire' : id === 5 ? 'Porshe' : id === 6 ? 'Gang' : id === 7 ? 'Ghost' : `C¥BRD Hoodie ${id}`,
+    name: id === 1 ? 'Flame Angel' : id === 2 ? 'Skelton' : id === 3 ? 'Rhuds' : id === 4 ? 'Vampire' : id === 5 ? 'Porshe' : id === 6 ? 'Gang' : id === 7 ? 'Ghost' : id === 8 ? 'subra' : `C¥BRD Hoodie ${id}`,
     price: PRICE_LE,
     image:
       id === 1 ? `/products/hoodie-1-front.png` :
@@ -23,6 +23,7 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
       id === 5 ? `/products/hoodie-5-front-black.png` :
       id === 6 ? `/products/hoodie-6-front.png` :
       id === 7 ? `/products/hoodie-7-front.png` :
+      id === 8 ? `/products/hoodie-8-front.png` :
       `/products/hoodie-${id}.jpg`,
     backImage:
       id === 1 ? `/products/hoodie-1-back.png` :
@@ -32,6 +33,7 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
       id === 5 ? `/products/hoodie-5-back-black.png` :
       id === 6 ? `/products/hoodie-6-back.png` :
       id === 7 ? `/products/hoodie-7-back.png` :
+      id === 8 ? `/products/hoodie-8-back.png` :
       undefined,
     variants: id === 3 ? {
       black: { front: '/products/hoodie-3-front-black.png', back: '/products/hoodie-3-back-black.png' },
