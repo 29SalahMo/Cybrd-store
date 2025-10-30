@@ -2,8 +2,18 @@ import { Link } from 'react-router-dom'
 import { products } from '../../data/products'
 import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
+import ImageWithFallback from '../ui/ImageWithFallback'
+import Meta from '../seo/Meta'
+import { useCart } from '../cart/CartContext'
+import { useToast } from '../ui/ToastContext'
+import { useWishlist } from '../wishlist/WishlistContext'
+import { flyToCart } from '../ui/flyToCart'
+import { flyToWishlist } from '../ui/flyToWishlist'
 
 export default function Shop() {
+  const { add } = useCart()
+  const { show } = useToast()
+  const { has, toggle } = useWishlist()
   const [q, setQ] = useState('')
   const [size, setSize] = useState<'' | 'M' | 'L' | 'XL' | '2XL'>('')
   const [color, setColor] = useState('')
@@ -34,6 +44,7 @@ export default function Shop() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+      <Meta title="Shop — C¥BRD" description="Browse limited-run hoodies and streetwear." />
       <h2 className="font-display text-3xl mb-6">Shop</h2>
 
       <div className="glass border border-white/10 rounded-xl p-4 mb-6">
@@ -73,17 +84,41 @@ export default function Shop() {
             viewport={{ once: true, amount: 0.13 }}
             transition={{ delay: idx * 0.08, type: 'spring', stiffness: 77 }}
           >
-            <Link to={`/product/${p.id}`} className="group glass rounded-xl overflow-hidden border border-white/10 hover:shadow-glow transition">
+            <div className="group glass rounded-xl overflow-hidden border border-white/10 hover:shadow-glow transition">
+              <Link to={`/product/${p.id}`} className="block">
               <div className="aspect-[4/5] bg-gradient-to-br from-black to-ink relative">
+                <button
+                  aria-label="Toggle wishlist"
+                  onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); const wasLoved = has(p.id); toggle(p.id); if (!wasLoved) { const card = e.currentTarget.closest('.group') as HTMLElement | null; const img = card?.querySelector('img') as HTMLElement | null; flyToWishlist(img) } }}
+                  className={`absolute right-2 top-2 z-10 p-2 rounded-full border ${has(p.id) ? 'bg-magenta text-black border-magenta' : 'bg-black/30 text-white border-white/10'}`}
+                >
+                  {has(p.id) ? '♥' : '♡'}
+                </button>
                 {p.backImage ? (
                   <>
-                    <img src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
-                    <img src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                    <ImageWithFallback src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" />
+                    <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" />
                   </>
                 ) : (
-                  <img src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                  <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" />
                 )}
+                {/* Quick Add button */}
+                <div className="absolute right-2 bottom-2 z-10">
+                  <motion.button
+                    whileHover={{ scale: 1.07 }}
+                    whileTap={{ scale: 0.93 }}
+                    onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); add({ id: p.id, name: p.name, price: p.price, image: p.image, size: 'M', quantity: 1 }); show('Added to cart', 'success'); const img = (e.currentTarget.closest('.aspect-[4/5]') as HTMLElement)?.querySelector('img') as HTMLElement | null; flyToCart(img) }}
+                    aria-label="Add to cart"
+                    className="p-2 rounded-full bg-magenta/90 text-black border border-white/10 hover:shadow-glowStrong"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 6h15l-1.5 9h-13L5 3H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 8v6M9 11h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </motion.button>
+                </div>
               </div>
+              </Link>
               <div className="p-4 flex items-center justify-between">
                 <div>
                   <div className="font-medium">{p.name}</div>
@@ -91,7 +126,7 @@ export default function Shop() {
                 </div>
                 <div className="text-neon font-semibold">{p.price}</div>
               </div>
-            </Link>
+            </div>
           </motion.div>
         ))}
       </div>

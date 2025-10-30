@@ -25,9 +25,9 @@ export default function Footer() {
           )}
         </div>
         <ul className="space-y-2">
-          <li><a className="hover:text-neon" href="#">Shipping & Returns</a></li>
-          <li><a className="hover:text-neon" href="#">Size Guide</a></li>
-          <li><a className="hover:text-neon" href="#">Privacy</a></li>
+          <li><a className="hover:text-neon" href="/policy/shipping-returns">Shipping & Returns</a></li>
+          <li><a className="hover:text-neon" href="/policy/privacy">Privacy</a></li>
+          <li><a className="hover:text-neon" href="/policy/terms">Terms</a></li>
         </ul>
         <div>
           <p className="mb-2">Join the drop list</p>

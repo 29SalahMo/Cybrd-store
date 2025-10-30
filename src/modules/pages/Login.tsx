@@ -1,5 +1,6 @@
 import { FormEvent, useState, useEffect } from 'react'
 import { useAuth } from '../auth/AuthContext'
+import { useToast } from '../ui/ToastContext'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Login() {
@@ -8,12 +9,14 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const { show } = useToast()
   useEffect(() => { document.title = 'Login — C¥BRD' }, [])
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
     try {
       await login(email, password)
+      show('Logged in', 'success')
       navigate('/checkout')
     } catch (err: any) {
       setError(err?.message || 'Failed to login')

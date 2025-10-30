@@ -2,12 +2,18 @@ import { Link } from 'react-router-dom'
 import Scene from '../three/Scene'
 import { products } from '../../data/products'
 import { motion } from 'framer-motion'
+import ImageWithFallback from '../ui/ImageWithFallback'
+import Meta from '../seo/Meta'
 import { useEffect } from 'react'
+import { useWishlist } from '../wishlist/WishlistContext'
+import { flyToWishlist } from '../ui/flyToWishlist'
 
 export default function Home() {
   useEffect(() => { document.title = 'C¥BRD — Home' }, [])
+  const { has, toggle } = useWishlist()
   return (
     <section>
+      <Meta title="C¥BRD — Streetwear with a Cyberpunk Soul" description="Limited-run hoodies and streetwear engineered with a cyberpunk vibe." image="/logo.png" />
       <Scene />
       <div className="h-[85vh] flex items-center justify-center">
         <div className="text-center">
@@ -31,19 +37,27 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.08, type: 'spring', stiffness: 77 }}
           >
-            <Link to={`/product/${p.id}`} className="group glass rounded-xl overflow-hidden border border-white/10 hover:shadow-glow transition">
+            <div className="group glass rounded-xl overflow-hidden border border-white/10 hover:shadow-glow transition">
+              <Link to={`/product/${p.id}`} className="block">
               <div className="aspect-[4/5] bg-gradient-to-br from-black to-ink relative">
+                <button
+                  aria-label="Toggle wishlist"
+                  onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); const wasLoved = has(p.id); toggle(p.id); if (!wasLoved) { const card = e.currentTarget.closest('.group') as HTMLElement | null; const img = card?.querySelector('img') as HTMLElement | null; flyToWishlist(img) } }}
+                  className={`absolute right-2 top-2 z-10 p-2 rounded-full border ${has(p.id) ? 'bg-magenta text-black border-magenta' : 'bg-black/30 text-white border-white/10'}`}
+                >
+                  {has(p.id) ? '♥' : '♡'}
+                </button>
                 {p.backImage ? (
                   <>
-                    {/* show back by default */}
-                    <img src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
-                    {/* front on hover */}
-                    <img src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                    <ImageWithFallback src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" />
+                    <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" />
                   </>
                 ) : (
-                  <img src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                  <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" />
                 )}
+                {/* Quick Add removed on Home page by request */}
               </div>
+              </Link>
               <div className="p-4 flex items-center justify-between">
                 <div>
                   <div className="font-medium">{p.name}</div>
@@ -51,7 +65,7 @@ export default function Home() {
                 </div>
                 <div className="text-neon font-semibold">{p.price}</div>
               </div>
-            </Link>
+            </div>
           </motion.div>
         ))}
       </div>

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../cart/CartContext'
+import Meta from '../seo/Meta'
 import { useEffect } from 'react'
 
 export default function Cart() {
@@ -9,6 +10,7 @@ export default function Cart() {
   useEffect(() => { document.title = 'Cart — C¥BRD' }, [])
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
+      <Meta title="Cart — C¥BRD" description="Your selected items." />
       <h1 className="font-display text-3xl mb-6">Cart</h1>
       {!hasItems ? (
         <div className="glass border border-white/10 rounded-xl p-6 flex items-center justify-between">

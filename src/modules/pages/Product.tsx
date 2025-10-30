@@ -3,12 +3,21 @@ import { getProductById, products, PRICE_LE } from '../../data/products'
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCart } from '../cart/CartContext'
+import { useToast } from '../ui/ToastContext'
+import { useWishlist } from '../wishlist/WishlistContext'
+import { flyToCart } from '../ui/flyToCart'
+import { flyToWishlist } from '../ui/flyToWishlist'
+import ImageWithFallback from '../ui/ImageWithFallback'
+import Meta from '../seo/Meta'
+import { logEvent } from '../analytics/analytics'
 
 export default function Product() {
   const { id } = useParams()
   const pid = Number(id)
   const product = Number.isFinite(pid) ? getProductById(pid) : undefined
   const { add } = useCart()
+  const { show } = useToast()
+  const { has, toggle } = useWishlist()
 
   const colors = useMemo(() => (product?.variants ? Object.keys(product.variants) : []), [product])
   const [color, setColor] = useState(colors[0] || '')
@@ -29,38 +38,59 @@ export default function Product() {
   const sizes: Array<'M' | 'L' | 'XL' | '2XL'> = ['M', 'L', 'XL', '2XL']
   const [size, setSize] = useState<'' | 'M' | 'L' | 'XL' | '2XL'>('')
   const [qty, setQty] = useState(1)
+  const [sizeError, setSizeError] = useState(false)
 
   const canAdd = !!product && (!!color || colors.length === 0) && !!size
 
-  const onAdd = () => {
-    if (!product || !canAdd) return
+  const onAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!product) return
+    if (!canAdd) {
+      setSizeError(true)
+      setTimeout(()=>setSizeError(false), 900)
+      return
+    }
+    const finalSize = (size || 'M') as 'M' | 'L' | 'XL' | '2XL'
     add({
       id: product.id,
       name: product.name,
       price: product.price,
       image: front || product.image,
-      size: size as 'M' | 'L' | 'XL' | '2XL',
+      size: finalSize,
       color: colors.length > 0 ? color : undefined,
       quantity: qty
     })
+    show('Added to cart', 'success')
+    const container = (e.currentTarget.closest('.max-w-6xl') as HTMLElement) || (document.querySelector('.product-main') as HTMLElement | null)
+    const img = container?.querySelector('.product-main img') as HTMLElement | null
+    flyToCart(img)
+    if (product) logEvent('add_to_cart', { id: product.id, name: product.name, price: product.price, qty: qty })
   }
 
   useEffect(() => {
     const t = product?.name ? `${product.name} — C¥BRD` : 'Product — C¥BRD'
     document.title = t
+    if (product) logEvent('view_item', { id: product.id, name: product.name, price: product.price })
   }, [product])
 
   return (
     <>
+      <Meta title={`${product?.name ?? 'Product'} — C¥BRD`} description="Premium heavyweight fleece hoodie." image={front || product?.image} />
       <div className="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-10">
-        <div className="aspect-[4/5] glass rounded-xl border border-white/10 relative overflow-hidden group">
+        <div className="aspect-[4/5] glass rounded-xl border border-white/10 relative overflow-hidden group product-main">
+          <button
+            aria-label="Toggle wishlist"
+            onClick={()=>{ if (!product) return; const wasLoved = has(product.id) ; toggle(product.id); if (!wasLoved) { const container = document.querySelector('.product-main') as HTMLElement | null; const img = container?.querySelector('img') as HTMLElement | null; flyToWishlist(img) } }}
+            className={`absolute right-3 top-3 z-10 p-2 rounded-full border ${product && has(product.id) ? 'bg-magenta text-black border-magenta' : 'bg-black/30 text-white border-white/10'}`}
+          >
+            {product && has(product.id) ? '♥' : '♡'}
+          </button>
           {back ? (
             <>
-              <img src={back} alt={(product?.name || 'Hoodie') + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-0 transition-opacity duration-200" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
-              <img src={front} alt={product?.name || ''} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-200" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+              <ImageWithFallback src={back} alt={(product?.name || 'Hoodie') + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-0 transition-opacity duration-200" />
+              <ImageWithFallback src={front!} alt={product?.name || ''} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
             </>
           ) : (
-            front && <img src={front} alt={product?.name || ''} className="absolute inset-0 w-full h-full object-cover" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+            front && <ImageWithFallback src={front} alt={product?.name || ''} className="absolute inset-0 w-full h-full object-cover" />
           )}
         </div>
         <div>
@@ -85,9 +115,16 @@ export default function Product() {
             <div className="text-sm text-bone/70 mb-2">Size</div>
             <div className="flex flex-wrap gap-2">
               {sizes.map((s) => (
-                <button key={s} onClick={() => setSize(s)} className={`px-4 py-2 rounded-md border ${size === s ? 'border-neon text-neon' : 'border-white/15 text-bone/80'}`}>
+                <motion.button
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.96 }}
+                  key={s}
+                  onClick={() => setSize(s)}
+                  className={`px-4 py-2 rounded-md border transition-colors ${size === s ? 'border-neon text-neon' : 'border-white/15 text-bone/80 hover:border-neon/50 hover:text-bone'}`}
+                  aria-pressed={size === s}
+                >
                   {s}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -97,7 +134,18 @@ export default function Product() {
             <input type="number" min={1} value={qty} onChange={(e)=>setQty(Math.max(1, Number(e.target.value)||1))} className="w-16 px-3 py-2 rounded-md bg-black/40 border border-white/15" />
           </div>
 
-          <button onClick={onAdd} disabled={!canAdd} className={`mt-6 px-6 py-3 rounded-md font-semibold hover:shadow-glowStrong ${canAdd ? 'bg-magenta' : 'bg-gray-600 cursor-not-allowed'}`}>Add to Cart</button>
+          <motion.button
+            whileHover={canAdd ? { scale: 1.03 } : {}}
+            whileTap={canAdd ? { scale: 0.97 } : {}}
+            animate={sizeError ? { boxShadow: '0 0 18px rgba(255,0,0,0.6)', scale: 1.02 } : {}}
+            onClick={onAdd}
+            className={`mt-6 px-6 py-3 rounded-md font-semibold transition-shadow ${canAdd ? 'bg-magenta hover:shadow-glowStrong' : 'bg-gray-700'} ${sizeError ? 'ring-2 ring-red-500' : ''}`}
+          >
+            {canAdd ? 'Add to Cart' : 'Choose Size'}
+          </motion.button>
+          {!canAdd && sizeError && (
+            <div className="mt-2 text-sm text-red-400">Choose your size first</div>
+          )}
         </div>
       </div>
       <div className="max-w-6xl mx-auto mt-20">

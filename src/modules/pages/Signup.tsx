@@ -1,5 +1,6 @@
 import { FormEvent, useState, useEffect } from 'react'
 import { useAuth } from '../auth/AuthContext'
+import { useToast } from '../ui/ToastContext'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Signup() {
@@ -9,12 +10,14 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const { show } = useToast()
   useEffect(() => { document.title = 'Sign up — C¥BRD' }, [])
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
     try {
       await signup(email, password, name)
+      show('Account created', 'success')
       navigate('/checkout')
     } catch (err: any) {
       setError(err?.message || 'Failed to sign up')
