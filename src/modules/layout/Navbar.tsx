@@ -1,5 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { useCart } from '../cart/CartContext'
+import { useAuth } from '../auth/AuthContext'
 
 function BrandMark() {
   return (
@@ -16,6 +18,8 @@ function BrandMark() {
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const { count } = useCart()
+  const { user, logout } = useAuth()
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
     window.addEventListener('scroll', onScroll)
@@ -42,7 +46,23 @@ export default function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-4">
-          <NavLink to="/cart" className="hover:text-magenta transition">Cart</NavLink>
+          {user ? (
+            <>
+              <span className="hidden md:inline text-bone/70 text-sm">Hi, {user.email}</span>
+              <button onClick={logout} className="text-sm text-bone/70 hover:text-bone">Logout</button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className="hover:text-neon transition text-sm">Login</NavLink>
+              <NavLink to="/signup" className="hover:text-neon transition text-sm">Sign up</NavLink>
+            </>
+          )}
+          <NavLink to="/cart" className="relative hover:text-magenta transition">
+            Cart
+            {count > 0 && (
+              <span className="absolute -right-3 -top-2 text-[10px] px-1.5 py-0.5 rounded-full bg-neon text-black font-bold">{count}</span>
+            )}
+          </NavLink>
         </div>
       </div>
       <BrandMark />
