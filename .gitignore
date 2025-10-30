@@ -3,6 +3,7 @@
 
 # Allow these files/folders
 !.gitignore
+!web
 !web/**
 !README.md
 
