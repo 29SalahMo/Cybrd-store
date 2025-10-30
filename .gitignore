@@ -1,6 +1,16 @@
-node_modules
-dist
-.vscode
-.DS_Store
-*.log
+# Ignore everything by default
+*
+
+# Allow these files/folders
+!.gitignore
+!web/**
+!README.md
+
+# Node artifacts anywhere (extra safety if web/ nested installs leave traces)
+**/node_modules/
+**/.env*
+**/.DS_Store
+**/dist/
+**/.vercel
+
 
