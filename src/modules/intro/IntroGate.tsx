@@ -27,6 +27,14 @@ export default function IntroGate({ children }: IntroGateProps) {
       v.preload = 'metadata'
       const onCanPlay = () => setCanPlay(true)
       v.addEventListener('canplay', onCanPlay, { once: true })
+      // Probe a frame: try muted play then immediately pause so first frame renders
+      v.muted = true
+      v.play().then(() => {
+        try {
+          v.pause()
+          v.currentTime = 0
+        } catch {}
+      }).catch(() => {})
       return () => v.removeEventListener('canplay', onCanPlay)
     } catch {}
   }, [])
@@ -63,10 +71,8 @@ export default function IntroGate({ children }: IntroGateProps) {
           src={`${baseUrl}intro/intro.mp4`}
           className={`w-full h-full object-cover transition-[filter] duration-300 ${isPlaying ? '' : 'blur-md'}`}
           onEnded={endIntro}
-          onPlaying={() => setIsPlaying(true)}
           onError={() => {
             setErrorText('Intro video failed to load.')
-            endIntro()
           }}
           playsInline
           preload="metadata"
@@ -77,7 +83,7 @@ export default function IntroGate({ children }: IntroGateProps) {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <button
             onClick={startVideo}
-            disabled={isStarting || !canPlay}
+            disabled={isStarting}
             className={`pointer-events-auto px-10 py-4 border border-white/60 text-white font-extrabold tracking-widest text-3xl md:text-5xl transition-opacity duration-200 ${isStarting ? 'opacity-0' : 'opacity-100'}`}
             style={{ fontFamily: 'Oswald, system-ui, sans-serif' }}
           >
