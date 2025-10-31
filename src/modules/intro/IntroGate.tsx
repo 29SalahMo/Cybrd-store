@@ -27,6 +27,12 @@ export default function IntroGate({ children }: IntroGateProps) {
       v.preload = 'metadata'
       const onCanPlay = () => setCanPlay(true)
       v.addEventListener('canplay', onCanPlay, { once: true })
+      // Mobile-only: try muted autoplay so a frame renders (prevents black screen)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      if (isMobile) {
+        v.muted = true
+        v.play().then(() => setIsPlaying(true)).catch(() => {})
+      }
       return () => v.removeEventListener('canplay', onCanPlay)
     } catch {}
   }, [])
