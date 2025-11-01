@@ -15,6 +15,7 @@ import Breadcrumbs from '../ui/Breadcrumbs'
 import { ProductStructuredData } from '../seo/StructuredData'
 import SizeGuideModal from '../ui/SizeGuideModal'
 import SocialShare from '../ui/SocialShare'
+import ImageZoom, { ImageZoomModal } from '../ui/ImageZoom'
 
 export default function Product() {
   const { id } = useParams()
@@ -45,6 +46,7 @@ export default function Product() {
   const [qty, setQty] = useState(1)
   const [sizeError, setSizeError] = useState(false)
   const [showSizeGuide, setShowSizeGuide] = useState(false)
+  const [zoomImage, setZoomImage] = useState<string | null>(null)
 
   const canAdd = !!product && (!!color || colors.length === 0) && !!size
 
@@ -109,15 +111,53 @@ export default function Product() {
           >
             {product && has(product.id) ? '♥' : '♡'}
           </button>
+          
+          {/* Zoom Button */}
+          {front && (
+            <button
+              onClick={() => setZoomImage(front)}
+              aria-label="Zoom product image"
+              className="absolute left-3 top-3 z-10 p-2 rounded-full bg-black/30 text-white border border-white/10 hover:bg-black/50 hover:border-neon/50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+              </svg>
+            </button>
+          )}
+          
           {back ? (
             <>
-              <ImageWithFallback src={back} alt={(product?.name || 'Hoodie') + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-0 transition-opacity duration-200" />
-              <ImageWithFallback src={front!} alt={product?.name || ''} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              <ImageZoom
+                src={back}
+                alt={(product?.name || 'Hoodie') + ' back'}
+                className="absolute inset-0 w-full h-full opacity-90 group-hover:opacity-0 transition-opacity duration-200"
+                zoomScale={1.5}
+              />
+              <ImageZoom
+                src={front!}
+                alt={product?.name || ''}
+                className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                zoomScale={1.5}
+              />
             </>
           ) : (
-            front && <ImageWithFallback src={front} alt={product?.name || ''} className="absolute inset-0 w-full h-full object-cover" />
+            front && (
+              <ImageZoom
+                src={front}
+                alt={product?.name || ''}
+                className="absolute inset-0 w-full h-full"
+                zoomScale={1.5}
+              />
+            )
           )}
         </div>
+        
+        <ImageZoomModal
+          src={zoomImage || ''}
+          alt={product?.name || 'Product'}
+          isOpen={!!zoomImage}
+          onClose={() => setZoomImage(null)}
+        />
         <div>
           <div className="flex items-start justify-between">
             <div className="flex-1">

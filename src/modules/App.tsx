@@ -23,6 +23,12 @@ import { ShippingReturns, PrivacyPolicy, TermsOfService } from './pages/Policy'
 import { ToastProvider, ToastViewport, useToast } from './ui/ToastContext'
 import { ErrorBoundary } from './ui/ErrorBoundary'
 import { trackWebVitals, trackPageLoad } from './utils/performance'
+import { initSentry } from './ui/SentrySetup'
+
+// Initialize Sentry if configured
+if (typeof window !== 'undefined') {
+  initSentry()
+}
 
 function GlobalErrorHandler({ children }: { children: React.ReactNode }) {
   const { show } = useToast()
@@ -66,7 +72,7 @@ export default function App() {
         <ErrorBoundary>
         <div className="min-h-screen flex flex-col">
           <Navbar />
-          <main className="flex-1" style={{ position: 'relative', zIndex: 1 }}>
+          <main id="main-content" className="flex-1" style={{ position: 'relative', zIndex: 1 }} tabIndex={-1}>
             <Suspense fallback={<div className="p-10">Loading…</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />

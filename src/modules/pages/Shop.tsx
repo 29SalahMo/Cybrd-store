@@ -11,6 +11,7 @@ import { useWishlist } from '../wishlist/WishlistContext'
 import { flyToCart } from '../ui/flyToCart'
 import { flyToWishlist } from '../ui/flyToWishlist'
 import { SearchAutocomplete } from '../ui/SearchAutocomplete'
+import QuickViewModal from '../ui/QuickViewModal'
 
 export default function Shop() {
   const { add } = useCart()
@@ -21,6 +22,7 @@ export default function Shop() {
   const [color, setColor] = useState('')
   const [sort, setSort] = useState<'relevance' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'newest'>('relevance')
   const [showFilters, setShowFilters] = useState(false)
+  const [quickViewProduct, setQuickViewProduct] = useState<typeof products[0] | null>(null)
 
   useEffect(() => { document.title = 'Shop — C¥BRD' }, [])
 
@@ -269,6 +271,22 @@ export default function Shop() {
                 >
                   {has(p.id) ? '♥' : '♡'}
                 </button>
+                {/* Quick View Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setQuickViewProduct(p)
+                  }}
+                  aria-label={`Quick view ${p.name}`}
+                  className="absolute left-2 top-2 z-10 p-2 rounded-full bg-black/30 text-white border border-white/10 hover:bg-black/50 hover:border-neon/50 transition-colors opacity-0 group-hover:opacity-100"
+                  title="Quick View"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
                 {p.backImage ? (
                   <>
                     <ImageWithFallback src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" />
@@ -307,6 +325,12 @@ export default function Shop() {
         </div>
         </>
       )}
+      
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+      />
     </div>
   )
 }

@@ -39,19 +39,42 @@ export default function Navbar() {
           <span className="text-burgundy">¥</span>
           <span className="text-bone">BRD</span>
         </Link>
-        <nav className="hidden md:flex gap-8 text-sm">
+        <nav className="hidden md:flex gap-8 text-sm" role="navigation" aria-label="Main navigation">
           {[
             {to: '/shop', label: 'Shop'},
             {to: '/about', label: 'About'},
             {to: '/contact', label: 'Contact'}
-          ].map((i) => (
-            <NavLink key={i.to} to={i.to} className={({isActive})=>`uppercase tracking-wide hover:text-neon transition ${isActive ? 'text-neon' : 'text-bone/80'}`}>
+          ].map((i, idx) => (
+            <NavLink 
+              key={i.to} 
+              to={i.to} 
+              className={({isActive})=>`uppercase tracking-wide hover:text-neon transition focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black rounded px-1 ${isActive ? 'text-neon' : 'text-bone/80'}`}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight' && idx < 2) {
+                  e.preventDefault()
+                  const nextLink = e.currentTarget.parentElement?.children[idx + 1] as HTMLElement
+                  nextLink?.focus()
+                } else if (e.key === 'ArrowLeft' && idx > 0) {
+                  e.preventDefault()
+                  const prevLink = e.currentTarget.parentElement?.children[idx - 1] as HTMLElement
+                  prevLink?.focus()
+                }
+              }}
+            >
               {i.label}
             </NavLink>
           ))}
         </nav>
         <div className="flex items-center gap-4">
-          <button className="md:hidden px-3 py-2 border border-white/15 rounded-md" onClick={()=>setOpen((o)=>!o)} aria-label="Menu">☰</button>
+          <button 
+            className="md:hidden px-3 py-2 border border-white/15 rounded-md hover:border-neon transition-colors focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black" 
+            onClick={()=>setOpen((o)=>!o)} 
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+          >
+            ☰
+          </button>
           {user ? (
             <>
               <span className="hidden md:inline text-bone/70 text-sm">Hi, {user.email}</span>
@@ -92,15 +115,44 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       <div className={`md:hidden fixed inset-0 z-40 transition ${open ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         <div className={`absolute inset-0 bg-black/60 transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`} onClick={()=>setOpen(false)}></div>
-        <div className={`absolute left-0 top-0 h-full w-72 glass border-r border-white/10 transform transition-transform ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div 
+          id="mobile-menu"
+          className={`absolute left-0 top-0 h-full w-72 glass border-r border-white/10 transform transition-transform ${open ? 'translate-x-0' : '-translate-x-full'}`}
+          role="navigation"
+          aria-label="Mobile menu"
+        >
           <div className="p-4 flex items-center justify-between border-b border-white/10">
             <div className="font-display">C¥BRD</div>
-            <button onClick={()=>setOpen(false)} aria-label="Close">✕</button>
+            <button 
+              onClick={()=>setOpen(false)} 
+              aria-label="Close menu"
+              className="hover:text-neon transition-colors focus:outline-none focus:ring-2 focus:ring-neon rounded"
+            >
+              ✕
+            </button>
           </div>
           <nav className="p-4 flex flex-col gap-3">
-            <NavLink to="/shop" onClick={()=>setOpen(false)} className="uppercase tracking-wide text-bone/90">Shop</NavLink>
-            <NavLink to="/about" onClick={()=>setOpen(false)} className="uppercase tracking-wide text-bone/90">About</NavLink>
-            <NavLink to="/contact" onClick={()=>setOpen(false)} className="uppercase tracking-wide text-bone/90">Contact</NavLink>
+            <NavLink 
+              to="/shop" 
+              onClick={()=>setOpen(false)} 
+              className="uppercase tracking-wide text-bone/90 hover:text-neon transition-colors focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black rounded px-1"
+            >
+              Shop
+            </NavLink>
+            <NavLink 
+              to="/about" 
+              onClick={()=>setOpen(false)} 
+              className="uppercase tracking-wide text-bone/90 hover:text-neon transition-colors focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black rounded px-1"
+            >
+              About
+            </NavLink>
+            <NavLink 
+              to="/contact" 
+              onClick={()=>setOpen(false)} 
+              className="uppercase tracking-wide text-bone/90 hover:text-neon transition-colors focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black rounded px-1"
+            >
+              Contact
+            </NavLink>
             <div className="h-px bg-white/10 my-2"></div>
             {user ? (
               <button onClick={()=>{logout(); setOpen(false)}} className="text-left text-bone/80">Logout</button>

@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom'
 import { useCart } from './CartContext'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { logEvent } from '../analytics/analytics'
+import { useFocusTrap } from '../utils/useFocusTrap'
 
 type Props = {
   isOpen: boolean
@@ -13,6 +14,9 @@ type Props = {
 export default function MiniCart({ isOpen, onClose }: Props) {
   const { items, subtotal, remove, setQuantity } = useCart()
   const navigate = useNavigate()
+  const cartRef = useRef<HTMLDivElement>(null)
+  
+  useFocusTrap(cartRef, isOpen)
 
   useEffect(() => {
     if (isOpen) {
@@ -23,6 +27,14 @@ export default function MiniCart({ isOpen, onClose }: Props) {
     }
     return () => { document.body.style.overflow = '' }
   }, [isOpen, items.length])
+  
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) onClose()
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen, onClose])
 
   const handleCheckout = () => {
     onClose()
@@ -42,19 +54,23 @@ export default function MiniCart({ isOpen, onClose }: Props) {
             className="fixed inset-0 z-40 bg-black/60"
           />
           <motion.div
+            ref={cartRef}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md glass border-l border-white/10 shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-title"
           >
             <div className="h-full flex flex-col">
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                <h2 className="font-display text-xl">Cart ({items.length})</h2>
+                <h2 id="cart-title" className="font-display text-xl">Cart ({items.length})</h2>
                 <button
                   onClick={onClose}
                   aria-label="Close cart"
-                  className="p-2 hover:bg-white/10 rounded-md transition"
+                  className="p-2 hover:bg-white/10 rounded-md transition focus:outline-none focus:ring-2 focus:ring-neon"
                 >
                   ✕
                 </button>

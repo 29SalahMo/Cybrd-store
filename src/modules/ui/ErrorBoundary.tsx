@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { captureException } from './SentrySetup'
 
 interface Props {
   children: ReactNode
@@ -26,10 +27,8 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('[ERROR_BOUNDARY]', error, errorInfo)
     this.setState({ errorInfo })
     
-    // Log to error tracking service (Sentry-ready)
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      ;(window as any).Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } })
-    }
+    // Log to error tracking service (Sentry)
+    captureException(error, { componentStack: errorInfo.componentStack })
   }
 
   render() {
