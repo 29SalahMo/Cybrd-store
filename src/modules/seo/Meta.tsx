@@ -36,6 +36,21 @@ export default function Meta({ title, description, image, url }: Props) {
     setProperty('og:image', image)
     setProperty('og:url', url || window.location.href)
     setProperty('og:type', 'website')
+    setProperty('og:site_name', 'C¥BRD')
+    // Twitter cards
+    set('twitter:card', 'summary_large_image')
+    set('twitter:title', title)
+    set('twitter:description', description)
+    set('twitter:image', image)
+    // Canonical URL
+    const canonicalUrl = url || window.location.href
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.setAttribute('rel', 'canonical')
+      document.head.appendChild(canonical)
+    }
+    canonical.setAttribute('href', canonicalUrl)
   }, [title, description, image, url])
   return null
 }

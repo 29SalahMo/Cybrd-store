@@ -102,8 +102,18 @@ export default function Product() {
             <div className="mt-6">
               <div className="text-sm text-bone/70 mb-2">Color</div>
               <div className="flex gap-2">
-                {colors.map((c) => (
-                  <button key={c} onClick={() => setColor(c)} className={`px-4 py-2 rounded-md border ${color === c ? 'border-neon text-neon' : 'border-white/15 text-bone/80'}`}>
+                {colors.map((c, idx) => (
+                  <button
+                    key={c}
+                    onClick={() => { setColor(c); logEvent('select_color', { id: product?.id, color: c }) }}
+                    aria-label={`Select color ${c}`}
+                    aria-pressed={color === c}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowLeft' && idx > 0) colors[idx - 1] && setColor(colors[idx - 1])
+                      if (e.key === 'ArrowRight' && idx < colors.length - 1) colors[idx + 1] && setColor(colors[idx + 1])
+                    }}
+                    className={`px-4 py-2 rounded-md border transition ${color === c ? 'border-neon text-neon' : 'border-white/15 text-bone/80 hover:border-neon/50'} focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black`}
+                  >
                     {c}
                   </button>
                 ))}
@@ -114,14 +124,19 @@ export default function Product() {
           <div className="mt-6">
             <div className="text-sm text-bone/70 mb-2">Size</div>
             <div className="flex flex-wrap gap-2">
-              {sizes.map((s) => (
+              {sizes.map((s, idx) => (
                 <motion.button
                   whileHover={{ scale: 1.06 }}
                   whileTap={{ scale: 0.96 }}
                   key={s}
-                  onClick={() => setSize(s)}
-                  className={`px-4 py-2 rounded-md border transition-colors ${size === s ? 'border-neon text-neon' : 'border-white/15 text-bone/80 hover:border-neon/50 hover:text-bone'}`}
+                  onClick={() => { setSize(s); logEvent('select_size', { id: product?.id, size: s }) }}
+                  aria-label={`Select size ${s}`}
                   aria-pressed={size === s}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowLeft' && idx > 0) setSize(sizes[idx - 1])
+                    if (e.key === 'ArrowRight' && idx < sizes.length - 1) setSize(sizes[idx + 1])
+                  }}
+                  className={`px-4 py-2 rounded-md border transition-colors ${size === s ? 'border-neon text-neon' : 'border-white/15 text-bone/80 hover:border-neon/50 hover:text-bone'} focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black`}
                 >
                   {s}
                 </motion.button>

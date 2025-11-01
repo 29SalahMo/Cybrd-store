@@ -17,16 +17,24 @@ import Signup from './pages/Signup'
 import { AuthProvider } from './auth/AuthContext'
 import OrderConfirmation from './pages/OrderConfirmation'
 import Wishlist from './pages/Wishlist'
+import NotFound from './pages/NotFound'
 import { ShippingReturns, PrivacyPolicy, TermsOfService } from './pages/Policy'
-import { ToastProvider, ToastViewport } from './ui/ToastContext'
+import { ToastProvider, ToastViewport, useToast } from './ui/ToastContext'
 
-export default function App() {
+function GlobalErrorHandler({ children }: { children: React.ReactNode }) {
+  const { show } = useToast()
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
       console.error('[ERROR]', event.message)
+      if (event.message?.includes('fetch') || event.message?.includes('network') || event.message?.includes('Network')) {
+        show('Network error. Please check your connection.', 'error')
+      }
     }
     const onRejection = (event: PromiseRejectionEvent) => {
       console.error('[UNHANDLED_REJECTION]', event.reason)
+      if (event.reason?.message?.includes('fetch') || event.reason?.message?.includes('network')) {
+        show('Network error. Please try again.', 'error')
+      }
     }
     window.addEventListener('error', onError)
     window.addEventListener('unhandledrejection', onRejection)
@@ -34,13 +42,18 @@ export default function App() {
       window.removeEventListener('error', onError)
       window.removeEventListener('unhandledrejection', onRejection)
     }
-  }, [])
+  }, [show])
+  return <>{children}</>
+}
+
+export default function App() {
   return (
     <IntroGate>
       <AuthProvider>
       <WishlistProvider>
       <CartProvider>
       <ToastProvider>
+        <GlobalErrorHandler>
         <div className="min-h-screen flex flex-col">
           <Navbar />
           <main className="flex-1">
@@ -60,12 +73,14 @@ export default function App() {
                 <Route path="/policy/terms" element={<TermsOfService />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>
           <Footer />
           <ToastViewport />
         </div>
+        </GlobalErrorHandler>
       </ToastProvider>
       </CartProvider>
       </WishlistProvider>

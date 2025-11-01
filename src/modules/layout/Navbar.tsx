@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useCart } from '../cart/CartContext'
 import { useAuth } from '../auth/AuthContext'
 import { useWishlist } from '../wishlist/WishlistContext'
+import MiniCart from '../cart/MiniCart'
 
 function BrandMark() {
   return (
@@ -20,6 +21,7 @@ function BrandMark() {
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
   const { count } = useCart()
   const { user, logout } = useAuth()
   const { ids } = useWishlist()
@@ -61,7 +63,7 @@ export default function Navbar() {
               <NavLink to="/signup" className="hover:text-neon transition text-sm">Sign up</NavLink>
             </>
           )}
-          <NavLink id="wishlist-target" to="/wishlist" className="relative hover:text-neon transition flex items-center gap-2">
+          <NavLink id="wishlist-target" to="/wishlist" aria-label={`Wishlist${ids.length > 0 ? ` (${ids.length} items)` : ''}`} className="relative hover:text-neon transition flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-neon focus:ring-offset-2 focus:ring-offset-black rounded">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M12.1 21s-6.6-3.9-9-7.5C1 10 2.5 7 5.5 7c2 0 3.1 1.3 3.6 2.2.5-.9 1.6-2.2 3.6-2.2 3 0 4.5 3 2.4 6.5-2.4 3.6-9 7.5-9 7.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -69,7 +71,12 @@ export default function Navbar() {
               <span key={ids.length} className="absolute -right-3 -top-2 text-[10px] px-1.5 py-0.5 rounded-full bg-magenta text-black font-bold animate-pulse">{ids.length}</span>
             )}
           </NavLink>
-          <NavLink id="cart-target" to="/cart" className="relative hover:text-magenta transition flex items-center gap-2">
+          <button
+            id="cart-target"
+            onClick={() => setCartOpen(true)}
+            aria-label={`Cart${count > 0 ? ` (${count} items)` : ''}`}
+            className="relative hover:text-magenta transition flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-magenta focus:ring-offset-2 focus:ring-offset-black rounded"
+          >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M6 6h15l-1.5 9h-13L5 3H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               <circle cx="9" cy="21" r="1" fill="currentColor"/>
@@ -78,7 +85,8 @@ export default function Navbar() {
             {count > 0 && (
               <span key={count} className="absolute -right-3 -top-2 text-[10px] px-1.5 py-0.5 rounded-full bg-neon text-black font-bold animate-pulse">{count}</span>
             )}
-          </NavLink>
+          </button>
+          <MiniCart isOpen={cartOpen} onClose={() => setCartOpen(false)} />
         </div>
       </div>
       {/* Mobile Drawer */}

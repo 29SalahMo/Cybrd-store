@@ -8,36 +8,30 @@ type IntroGateProps = {
 export default function IntroGate({ children }: IntroGateProps) {
   const { pathname } = useLocation()
   const skipIntro = pathname.startsWith('/policy')
-  const [showIntro, setShowIntro] = useState(true)
+  const [showIntro, setShowIntro] = useState(() => {
+    // Check if intro was already shown this session
+    if (sessionStorage.getItem('introSeen') === 'true') return false
+    return true
+  })
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
-  const [canPlay, setCanPlay] = useState(false)
   const [errorText, setErrorText] = useState<string | null>(null)
 
   const baseUrl: string = ((import.meta as any)?.env?.BASE_URL as string) || '/'
 
-  // Always show intro (unless bypassed by route) and render video; avoid prefetch checks
-
   // Prepare element without fetching data to avoid pre-download/IDM; enable ENTER immediately
   useEffect(() => {
     const v = videoRef.current
-    if (!v) return
+    if (!v || !showIntro) return
     try {
       v.preload = 'metadata'
-      const onCanPlay = () => setCanPlay(true)
-      v.addEventListener('canplay', onCanPlay, { once: true })
-      // Probe a frame: try muted play then immediately pause so first frame renders
+      // Ensure video stays paused - no autoplay attempts
       v.muted = true
-      v.play().then(() => {
-        try {
-          v.pause()
-          v.currentTime = 0
-        } catch {}
-      }).catch(() => {})
-      return () => v.removeEventListener('canplay', onCanPlay)
+      v.pause()
+      v.currentTime = 0
     } catch {}
-  }, [])
+  }, [showIntro])
 
   const startVideo = async () => {
     const v = videoRef.current
@@ -57,7 +51,10 @@ export default function IntroGate({ children }: IntroGateProps) {
     }
   }
 
-  const endIntro = () => setShowIntro(false)
+  const endIntro = () => {
+    setShowIntro(false)
+    sessionStorage.setItem('introSeen', 'true')
+  }
 
   if (skipIntro || !showIntro) return <>{children}</>
 

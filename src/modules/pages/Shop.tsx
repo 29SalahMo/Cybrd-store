@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import ImageWithFallback from '../ui/ImageWithFallback'
 import Meta from '../seo/Meta'
 import { useCart } from '../cart/CartContext'
+import ProductSkeleton from '../ui/ProductSkeleton'
 import { useToast } from '../ui/ToastContext'
 import { useWishlist } from '../wishlist/WishlistContext'
 import { flyToCart } from '../ui/flyToCart'
@@ -75,8 +76,14 @@ export default function Shop() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {filtered.map((p, idx) => (
+      {filtered.length === 0 ? (
+        <div className="text-center py-16 text-bone/70">
+          <p className="text-lg mb-2">No products found</p>
+          <p className="text-sm">Try adjusting your filters</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {filtered.map((p, idx) => (
           <motion.div
             key={p.id}
             initial={{ opacity: 0, y: 40 }}
@@ -128,8 +135,9 @@ export default function Shop() {
               </div>
             </div>
           </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

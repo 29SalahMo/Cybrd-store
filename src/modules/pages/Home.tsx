@@ -49,11 +49,11 @@ export default function Home() {
                 </button>
                 {p.backImage ? (
                   <>
-                    <ImageWithFallback src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" />
-                    <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" />
+                    <ImageWithFallback src={p.backImage} alt={p.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" eager={idx === 0} />
+                    <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" eager={idx === 0} />
                   </>
                 ) : (
-                  <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+                  <ImageWithFallback src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-90" eager={idx === 0} />
                 )}
                 {/* Quick Add removed on Home page by request */}
               </div>

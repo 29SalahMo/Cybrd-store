@@ -37,11 +37,24 @@ export default function Cart() {
             ))}
           </div>
           <div className="glass border border-white/10 rounded-xl p-5 h-fit">
-            <div className="flex items-center justify-between text-bone/80">
-              <div>Subtotal</div>
-              <div className="font-semibold">{subtotal.toFixed(2)} LE</div>
+            <div className="space-y-2 border-b border-white/10 pb-3 mb-3">
+              <div className="flex items-center justify-between text-bone/80">
+                <div>Subtotal</div>
+                <div className="font-semibold">{subtotal.toFixed(2)} LE</div>
+              </div>
+              <div className="flex items-center justify-between text-bone/60 text-sm">
+                <div>Shipping</div>
+                <div className="text-bone/50">Calculated at checkout</div>
+              </div>
+              <div className="flex items-center justify-between text-bone/60 text-sm">
+                <div>Tax</div>
+                <div className="text-bone/50">Calculated at checkout</div>
+              </div>
             </div>
-            <div className="text-xs text-bone/50 mt-1">Taxes and shipping calculated at checkout.</div>
+            <div className="flex items-center justify-between text-lg font-semibold text-bone mb-4">
+              <div>Estimated Total</div>
+              <div className="text-neon">{subtotal.toFixed(2)} LE</div>
+            </div>
             <button onClick={()=>navigate('/checkout')} className="mt-4 w-full px-5 py-3 rounded-md bg-neon text-black font-bold hover:shadow-glowStrong">Proceed to Checkout</button>
             <button onClick={clear} className="mt-2 w-full px-5 py-2 rounded-md border border-white/15 hover:border-magenta">Clear Cart</button>
             <Link to="/shop" className="mt-3 block text-center text-sm text-bone/70 hover:text-bone">Continue Shopping</Link>
