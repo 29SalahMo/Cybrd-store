@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-bone/70 mb-6">
               Something went wrong. Our team has been notified.
             </p>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {((import.meta as any)?.env?.DEV as boolean) === true && this.state.error && (
               <details className="mb-6 text-left bg-black/40 p-4 rounded border border-white/10">
                 <summary className="cursor-pointer text-red-400 mb-2">Error Details</summary>
                 <pre className="text-xs text-bone/60 overflow-auto">

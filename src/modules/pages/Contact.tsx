@@ -2,6 +2,7 @@ import { FormEvent, useState, useEffect } from 'react'
 import { validateEmail, validateName, validateRequired } from '../utils/validation'
 import { sanitizeInput, sanitizeEmail } from '../utils/sanitize'
 import { useToast } from '../ui/ToastContext'
+import Meta from '../seo/Meta'
 
 export default function Contact() {
   const [name, setName] = useState('')
@@ -58,6 +59,10 @@ export default function Contact() {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-12">
+      <Meta 
+        title="Contact — C¥BRD" 
+        description="Get in touch with C¥BRD. Questions about our streetwear, orders, or collaborations? We'd love to hear from you." 
+      />
       <h1 className="font-display text-3xl mb-6">Contact</h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>

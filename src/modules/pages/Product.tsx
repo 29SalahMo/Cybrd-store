@@ -84,12 +84,19 @@ export default function Product() {
   // Get recently viewed products (excluding current)
   const recentlyViewed = useMemo(() => {
     const ids = getRecentlyViewed().filter(id => id !== pid)
-    return ids.slice(0, 4).map(id => getProductById(id)).filter(Boolean)
+    return ids.slice(0, 4)
+      .map(id => getProductById(id))
+      .filter((p): p is NonNullable<typeof p> => p !== undefined)
   }, [pid])
 
   return (
     <>
-      <Meta title={`${product?.name ?? 'Product'} — C¥BRD`} description="Premium heavyweight fleece hoodie." image={front || product?.image} />
+      <Meta 
+        title={`${product?.name ?? 'Product'} — C¥BRD`} 
+        description={`${product?.name || 'Premium hoodie'} — Limited-run cyberpunk streetwear. ${product?.price || '699 LE'}. Premium heavyweight fleece with unique design.`}
+        image={front || product?.image}
+        url={`${typeof window !== 'undefined' ? window.location.origin : ''}/product/${id}`}
+      />
       {product && <ProductStructuredData product={product} />}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <Breadcrumbs />
