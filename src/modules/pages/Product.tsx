@@ -16,6 +16,7 @@ import { ProductStructuredData } from '../seo/StructuredData'
 import SizeGuideModal from '../ui/SizeGuideModal'
 import SocialShare from '../ui/SocialShare'
 import ImageZoom, { ImageZoomModal } from '../ui/ImageZoom'
+import ProductImageGallery from '../ui/ProductImageGallery'
 
 export default function Product() {
   const { id } = useParams()
@@ -30,6 +31,21 @@ export default function Product() {
   const active = product?.variants && color ? product.variants[color] : undefined
   const front = active?.front || product?.image
   const back = active?.back || product?.backImage
+  
+  // Get gallery images - prioritize variant gallery, then product gallery, then fallback to front/back
+  const galleryImages = useMemo(() => {
+    if (active?.gallery && active.gallery.length > 0) {
+      return active.gallery
+    }
+    if (product?.gallery && product.gallery.length > 0) {
+      return product.gallery
+    }
+    // Fallback to front and back images
+    const images: string[] = []
+    if (front) images.push(front)
+    if (back && back !== front) images.push(back)
+    return images.length > 0 ? images : [product?.image || ''].filter(Boolean)
+  }, [active, product, front, back])
 
   // Recommend up to 4 random other products (excluding this one)
   const recommendations = useMemo(() => {
@@ -103,52 +119,26 @@ export default function Product() {
       <div className="max-w-6xl mx-auto px-4 py-12">
         <Breadcrumbs />
         <div className="grid md:grid-cols-2 gap-10">
-        <div className="aspect-[4/5] glass rounded-xl border border-white/10 relative overflow-hidden group product-main">
+        <div className="relative product-main">
+          {/* Wishlist Button */}
           <button
             aria-label="Toggle wishlist"
             onClick={()=>{ if (!product) return; const wasLoved = has(product.id) ; toggle(product.id); if (!wasLoved) { const container = document.querySelector('.product-main') as HTMLElement | null; const img = container?.querySelector('img') as HTMLElement | null; flyToWishlist(img) } }}
-            className={`absolute right-3 top-3 z-10 p-2 rounded-full border ${product && has(product.id) ? 'bg-magenta text-black border-magenta' : 'bg-black/30 text-white border-white/10'}`}
+            className={`absolute right-3 top-3 z-20 p-2 rounded-full border backdrop-blur-sm transition-all duration-300 ${
+              product && has(product.id) 
+                ? 'bg-magenta text-black border-magenta shadow-[0_0_20px_rgba(255,0,255,0.5)]' 
+                : 'bg-black/60 text-white border-white/20 hover:bg-black/80 hover:border-neon/50 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]'
+            }`}
           >
             {product && has(product.id) ? '♥' : '♡'}
           </button>
           
-          {/* Zoom Button */}
-          {front && (
-            <button
-              onClick={() => setZoomImage(front)}
-              aria-label="Zoom product image"
-              className="absolute left-3 top-3 z-10 p-2 rounded-full bg-black/30 text-white border border-white/10 hover:bg-black/50 hover:border-neon/50 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-              </svg>
-            </button>
-          )}
-          
-          {back ? (
-            <>
-              <ImageZoom
-                src={back}
-                alt={(product?.name || 'Hoodie') + ' back'}
-                className="absolute inset-0 w-full h-full opacity-90 group-hover:opacity-0 transition-opacity duration-200"
-                zoomScale={1.5}
-              />
-              <ImageZoom
-                src={front!}
-                alt={product?.name || ''}
-                className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                zoomScale={1.5}
-              />
-            </>
-          ) : (
-            front && (
-              <ImageZoom
-                src={front}
-                alt={product?.name || ''}
-                className="absolute inset-0 w-full h-full"
-                zoomScale={1.5}
-              />
-            )
+          {/* Product Image Gallery */}
+          {galleryImages.length > 0 && (
+            <ProductImageGallery
+              images={galleryImages}
+              alt={product?.name || 'Product'}
+            />
           )}
         </div>
         

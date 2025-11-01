@@ -10,28 +10,119 @@ interface ImageZoomProps {
 
 export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: ImageZoomProps) {
   const [isZoomed, setIsZoomed] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, posX: 0, posY: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
 
+  // Toggle zoom on click
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return
+    
+    // Prevent click if we just finished dragging
+    if (isDragging) {
+      return
+    }
+    
+    // If not zoomed, activate zoom and center on click point
+    if (!isZoomed) {
+      setIsZoomed(true)
+      const rect = containerRef.current.getBoundingClientRect()
+      const clickX = ((e.clientX - rect.left) / rect.width) * 100
+      const clickY = ((e.clientY - rect.top) / rect.height) * 100
+      
+      // Calculate offset to center the clicked point
+      // When zoomed 2x, image is 200% size, so it extends 50% beyond container on each side
+      // To center click point: offset = (click - 50) * zoomScale
+      const maxOffset = 50 * (zoomScale - 1)
+      setPosition({
+        x: Math.max(-maxOffset, Math.min(maxOffset, (clickX - 50) * zoomScale)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, (clickY - 50) * zoomScale))
+      })
+    } else {
+      // If zoomed, deactivate on click
+      setIsZoomed(false)
+      setPosition({ x: 0, y: 0 })
+    }
+  }
+
+  // Handle drag start when zoomed
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isZoomed || !containerRef.current) return
+    e.preventDefault()
+    setIsDragging(true)
+    setDragStart({
+      x: e.clientX,
+      y: e.clientY,
+      posX: position.x,
+      posY: position.y
+    })
+  }
+
+  // Handle drag - use global mouse move for better tracking
+  useEffect(() => {
+    if (!isDragging || !isZoomed || !containerRef.current) return
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      const rect = containerRef.current!.getBoundingClientRect()
+      const deltaXPixels = e.clientX - dragStart.x
+      const deltaYPixels = e.clientY - dragStart.y
+      
+      // Convert pixel movement to percentage of container
+      const deltaXPercent = (deltaXPixels / rect.width) * 100
+      const deltaYPercent = (deltaYPixels / rect.height) * 100
+      
+      // Calculate bounds - when zoomed 2x, image extends 50% beyond container on each side
+      const maxOffset = 50 * (zoomScale - 1)
+      
+      // Update position - mouse movement directly translates to image movement
+      setPosition({
+        x: Math.max(-maxOffset, Math.min(maxOffset, dragStart.posX + deltaXPercent)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, dragStart.posY + deltaYPercent))
+      })
+    }
+
+    document.addEventListener('mousemove', handleGlobalMouseMove)
+    return () => document.removeEventListener('mousemove', handleGlobalMouseMove)
+  }, [isDragging, isZoomed, dragStart, zoomScale])
+
+  // Handle drag (local for initial click)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current || !isZoomed) return
-    
-    const rect = containerRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-    
-    setPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) })
+    // This is handled by global mousemove when dragging
   }
 
+  // Handle drag end
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  // Handle mouse leave - only deactivate if not dragging
   const handleMouseLeave = () => {
-    setIsZoomed(false)
+    if (!isDragging) {
+      // Keep zoomed but reset position on mouse leave
+      // Or deactivate if user prefers
+      // setIsZoomed(false)
+    }
   }
 
+  // Global mouse up handler for drag
+  useEffect(() => {
+    if (isDragging) {
+      const handleGlobalMouseUp = () => {
+        setIsDragging(false)
+      }
+      document.addEventListener('mouseup', handleGlobalMouseUp)
+      return () => document.removeEventListener('mouseup', handleGlobalMouseUp)
+    }
+  }, [isDragging])
+
+  // Escape key to deactivate zoom
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isZoomed) {
         setIsZoomed(false)
+        setPosition({ x: 0, y: 0 })
       }
     }
     document.addEventListener('keydown', handleKeyDown)
@@ -41,10 +132,12 @@ export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: I
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden cursor-zoom-in ${className}`}
+      className={`relative overflow-hidden ${isZoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'} ${className}`}
       style={{ position: className.includes('absolute') ? 'absolute' : 'relative' }}
-      onMouseEnter={() => setIsZoomed(true)}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
       role="img"
       aria-label={alt}
@@ -53,19 +146,30 @@ export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: I
         ref={imgRef}
         src={src}
         alt={alt}
-        className="w-full h-full object-cover"
-        style={{ pointerEvents: 'none' }}
+        className="w-full h-full object-cover select-none"
+        style={{ 
+          pointerEvents: 'none', 
+          userSelect: 'none',
+          transformOrigin: 'center center'
+        }}
         animate={{
           scale: isZoomed ? zoomScale : 1,
-          x: isZoomed ? `calc(-${position.x}% * ${zoomScale - 1})` : 0,
-          y: isZoomed ? `calc(-${position.y}% * ${zoomScale - 1})` : 0,
+          // When zoomed: center the scaled image, then offset by position
+          // Position is in percentage of container size
+          x: isZoomed ? `${position.x}%` : 0,
+          y: isZoomed ? `${position.y}%` : 0,
         }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ 
+          type: isDragging ? false : 'spring', 
+          stiffness: 400, 
+          damping: 30,
+          duration: isDragging ? 0 : 0.3
+        }}
       />
       
       {isZoomed && (
         <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/60 text-white text-xs pointer-events-none z-10">
-          Zoom active
+          {isDragging ? 'Drag to pan • Click to exit' : 'Zoom active • Drag to pan • Click to exit'}
         </div>
       )}
     </div>
@@ -133,4 +237,3 @@ export function ImageZoomModal({ src, alt, isOpen, onClose }: { src: string; alt
     </AnimatePresence>
   )
 }
-
