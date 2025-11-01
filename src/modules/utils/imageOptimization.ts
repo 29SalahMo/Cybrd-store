@@ -81,3 +81,4 @@ export function generatePictureSources(src: string, alt: string): {
   }
 }
 
+

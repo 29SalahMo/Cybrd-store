@@ -56,3 +56,4 @@ console.log(`✅ Generated sitemap.xml with ${allPages.length} URLs`)
 console.log(`   Static pages: ${staticPages.length}`)
 console.log(`   Product pages: ${productPages.length}`)
 
+
