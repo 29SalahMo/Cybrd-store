@@ -33,7 +33,7 @@ export default function Footer() {
                 console.log('[FOOTER] Clicked shipping-returns link')
                 e.stopPropagation()
               }}
-              className="hover:text-neon transition-colors cursor-pointer inline-block"
+              className="text-bone/90 hover:text-neon transition-colors cursor-pointer inline-block underline-offset-2 hover:underline"
               style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
             >
               Shipping & Returns
@@ -46,7 +46,7 @@ export default function Footer() {
                 console.log('[FOOTER] Clicked privacy link')
                 e.stopPropagation()
               }}
-              className="hover:text-neon transition-colors cursor-pointer inline-block"
+              className="text-bone/90 hover:text-neon transition-colors cursor-pointer inline-block underline-offset-2 hover:underline"
               style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
             >
               Privacy
@@ -59,7 +59,7 @@ export default function Footer() {
                 console.log('[FOOTER] Clicked terms link')
                 e.stopPropagation()
               }}
-              className="hover:text-neon transition-colors cursor-pointer inline-block"
+              className="text-bone/90 hover:text-neon transition-colors cursor-pointer inline-block underline-offset-2 hover:underline"
               style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
             >
               Terms
