@@ -1,25 +1,28 @@
 import { Route, Routes } from 'react-router-dom'
-import { Suspense, useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import Navbar from './layout/Navbar'
 import { CartProvider } from './cart/CartContext'
 import Footer from './layout/Footer'
 import IntroGate from './intro/IntroGate'
 import { WishlistProvider } from './wishlist/WishlistContext'
-import Home from './pages/Home'
-import Shop from './pages/Shop'
-import Product from './pages/Product'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import Cart from './pages/Cart'
-import Checkout from './pages/Checkout'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
 import { AuthProvider } from './auth/AuthContext'
-import OrderConfirmation from './pages/OrderConfirmation'
-import Wishlist from './pages/Wishlist'
-import NotFound from './pages/NotFound'
+// Lazy load routes for code splitting
+const Home = lazy(() => import('./pages/Home'))
+const Shop = lazy(() => import('./pages/Shop'))
+const Product = lazy(() => import('./pages/Product'))
+const About = lazy(() => import('./pages/About'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Cart = lazy(() => import('./pages/Cart'))
+const Checkout = lazy(() => import('./pages/Checkout'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'))
+const Wishlist = lazy(() => import('./pages/Wishlist'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 import { ShippingReturns, PrivacyPolicy, TermsOfService } from './pages/Policy'
 import { ToastProvider, ToastViewport, useToast } from './ui/ToastContext'
+import { ErrorBoundary } from './ui/ErrorBoundary'
+import { trackWebVitals, trackPageLoad } from './utils/performance'
 
 function GlobalErrorHandler({ children }: { children: React.ReactNode }) {
   const { show } = useToast()
@@ -48,6 +51,11 @@ function GlobalErrorHandler({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    trackWebVitals()
+    trackPageLoad()
+  }, [])
+
   return (
     <IntroGate>
       <AuthProvider>
@@ -55,9 +63,10 @@ export default function App() {
       <CartProvider>
       <ToastProvider>
         <GlobalErrorHandler>
+        <ErrorBoundary>
         <div className="min-h-screen flex flex-col">
           <Navbar />
-          <main className="flex-1">
+          <main className="flex-1" style={{ position: 'relative', zIndex: 1 }}>
             <Suspense fallback={<div className="p-10">Loading…</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -81,6 +90,7 @@ export default function App() {
           <Footer />
           <ToastViewport />
         </div>
+        </ErrorBoundary>
         </GlobalErrorHandler>
       </ToastProvider>
       </CartProvider>

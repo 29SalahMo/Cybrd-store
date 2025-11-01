@@ -12,10 +12,10 @@ export default function Home() {
   useEffect(() => { document.title = 'C¥BRD — Home' }, [])
   const { has, toggle } = useWishlist()
   return (
-    <section>
+    <section style={{ position: 'relative', zIndex: 1 }}>
       <Meta title="C¥BRD — Streetwear with a Cyberpunk Soul" description="Limited-run hoodies and streetwear engineered with a cyberpunk vibe." image="/logo.png" />
-      <Scene />
-      <div className="h-[85vh] flex items-center justify-center">
+      <Scene>
+        <div className="h-[85vh] flex items-center justify-center" style={{ position: 'relative', zIndex: 1 }}>
         <div className="text-center">
           <h1 className="font-display text-5xl md:text-7xl tracking-wider">
             <span className="text-bone">C</span>
@@ -28,8 +28,8 @@ export default function Home() {
             <Link to="/about" className="px-6 py-3 rounded-md border border-white/15 hover:border-neon">About</Link>
           </div>
         </div>
-      </div>
-      <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-6 pb-16">
+        </div>
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-6 pb-16" style={{ position: 'relative', zIndex: 1 }}>
         {products.slice(0, 8).map((p, idx) => (
           <motion.div
             key={p.id}
@@ -68,7 +68,8 @@ export default function Home() {
             </div>
           </motion.div>
         ))}
-      </div>
+        </div>
+      </Scene>
     </section>
   )
 }

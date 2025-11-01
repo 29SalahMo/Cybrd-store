@@ -123,10 +123,25 @@ export default function Scene({ children }: { children?: React.ReactNode }) {
 
   return (
     <div className="relative">
-      {/* Background 3D layer */}
+      {/* Background 3D layer - must stay behind all content */}
       {webgl && (
-        <div className="fixed inset-0 -z-[999] pointer-events-none" style={{ zIndex: -999 }}>
-          <Canvas camera={{ position: [0, 0.6, 3.6], fov: 50 }} dpr={[1, 2]}>
+        <div 
+          className="fixed inset-0 pointer-events-none" 
+          style={{ 
+            zIndex: -9999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: 'none'
+          }}
+        >
+          <Canvas 
+            camera={{ position: [0, 0.6, 3.6], fov: 50 }} 
+            dpr={[1, 2]}
+            style={{ position: 'absolute', zIndex: -9999 }}
+          >
             <Suspense fallback={null}>
               <BackgroundHoodie scrollY={scrollY} />
               <SpinningLogo />
@@ -136,7 +151,9 @@ export default function Scene({ children }: { children?: React.ReactNode }) {
         </div>
       )}
       {/* Foreground content */}
-      {children}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {children}
+      </div>
     </div>
   )
 }

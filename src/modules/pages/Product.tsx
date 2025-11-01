@@ -10,6 +10,11 @@ import { flyToWishlist } from '../ui/flyToWishlist'
 import ImageWithFallback from '../ui/ImageWithFallback'
 import Meta from '../seo/Meta'
 import { logEvent } from '../analytics/analytics'
+import { addRecentlyViewed, getRecentlyViewed } from '../utils/recentlyViewed'
+import Breadcrumbs from '../ui/Breadcrumbs'
+import { ProductStructuredData } from '../seo/StructuredData'
+import SizeGuideModal from '../ui/SizeGuideModal'
+import SocialShare from '../ui/SocialShare'
 
 export default function Product() {
   const { id } = useParams()
@@ -39,6 +44,7 @@ export default function Product() {
   const [size, setSize] = useState<'' | 'M' | 'L' | 'XL' | '2XL'>('')
   const [qty, setQty] = useState(1)
   const [sizeError, setSizeError] = useState(false)
+  const [showSizeGuide, setShowSizeGuide] = useState(false)
 
   const canAdd = !!product && (!!color || colors.length === 0) && !!size
 
@@ -69,13 +75,25 @@ export default function Product() {
   useEffect(() => {
     const t = product?.name ? `${product.name} — C¥BRD` : 'Product — C¥BRD'
     document.title = t
-    if (product) logEvent('view_item', { id: product.id, name: product.name, price: product.price })
+    if (product) {
+      logEvent('view_item', { id: product.id, name: product.name, price: product.price })
+      addRecentlyViewed(product.id)
+    }
   }, [product])
+
+  // Get recently viewed products (excluding current)
+  const recentlyViewed = useMemo(() => {
+    const ids = getRecentlyViewed().filter(id => id !== pid)
+    return ids.slice(0, 4).map(id => getProductById(id)).filter(Boolean)
+  }, [pid])
 
   return (
     <>
       <Meta title={`${product?.name ?? 'Product'} — C¥BRD`} description="Premium heavyweight fleece hoodie." image={front || product?.image} />
-      <div className="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-10">
+      {product && <ProductStructuredData product={product} />}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <Breadcrumbs />
+        <div className="grid md:grid-cols-2 gap-10">
         <div className="aspect-[4/5] glass rounded-xl border border-white/10 relative overflow-hidden group product-main">
           <button
             aria-label="Toggle wishlist"
@@ -94,9 +112,20 @@ export default function Product() {
           )}
         </div>
         <div>
-          <h1 className="font-display text-3xl">{product?.name ?? `C¥BRD Hoodie ${id}`}</h1>
-          <p className="text-bone/70 mt-2">Matte black heavyweight fleece with burgundy cyber-stitch and neon piping.</p>
-          <div className="mt-4 text-2xl text-neon font-semibold">{product?.price ?? PRICE_LE}</div>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h1 className="font-display text-3xl">{product?.name ?? `C¥BRD Hoodie ${id}`}</h1>
+              <p className="text-bone/70 mt-2">Matte black heavyweight fleece with burgundy cyber-stitch and neon piping.</p>
+              <div className="mt-4 text-2xl text-neon font-semibold">{product?.price ?? PRICE_LE}</div>
+            </div>
+            {product && typeof window !== 'undefined' && (
+              <SocialShare
+                url={window.location.href}
+                title={product.name}
+                description="Check out this hoodie from C¥BRD"
+              />
+            )}
+          </div>
 
           {colors.length > 0 && (
             <div className="mt-6">
@@ -122,7 +151,15 @@ export default function Product() {
           )}
 
           <div className="mt-6">
-            <div className="text-sm text-bone/70 mb-2">Size</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-bone/70">Size</div>
+              <button
+                onClick={() => setShowSizeGuide(true)}
+                className="text-xs text-neon hover:underline focus:outline-none focus:ring-2 focus:ring-neon/50 rounded px-1"
+              >
+                Size Guide
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
               {sizes.map((s, idx) => (
                 <motion.button
@@ -162,8 +199,34 @@ export default function Product() {
             <div className="mt-2 text-sm text-red-400">Choose your size first</div>
           )}
         </div>
+        </div>
       </div>
-      <div className="max-w-6xl mx-auto mt-20">
+      <SizeGuideModal isOpen={showSizeGuide} onClose={() => setShowSizeGuide(false)} />
+      {recentlyViewed.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 mt-16">
+          <h2 className="font-display text-2xl mb-6">Recently Viewed</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {recentlyViewed.map((rec) => (
+              <Link key={rec.id} to={`/product/${rec.id}`} className="group block glass rounded-xl overflow-hidden border border-white/10 hover:shadow-glow transition">
+                <div className="aspect-[4/5] bg-gradient-to-br from-black to-ink relative">
+                  {rec.backImage ? (
+                    <>
+                      <ImageWithFallback src={rec.backImage} alt={rec.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" />
+                      <ImageWithFallback src={rec.image} alt={rec.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" />
+                    </>
+                  ) : (
+                    <ImageWithFallback src={rec.image} alt={rec.name} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+                  )}
+                </div>
+                <div className="p-3 text-sm font-semibold text-bone/90 text-center">
+                  {rec.name}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="max-w-6xl mx-auto px-4 mt-20">
         <h2 className="font-display text-2xl mb-3">You might also like</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {recommendations.map((rec, idx) => (
@@ -177,11 +240,11 @@ export default function Product() {
                 <div className="aspect-[4/5] bg-gradient-to-br from-black to-ink relative">
                   {rec.backImage ? (
                     <>
-                      <img src={rec.backImage} alt={rec.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
-                      <img src={rec.image} alt={rec.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                      <ImageWithFallback src={rec.backImage} alt={rec.name + ' back'} className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity duration-200 group-hover:opacity-0" />
+                      <ImageWithFallback src={rec.image} alt={rec.name} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-90" />
                     </>
                   ) : (
-                    <img src={rec.image} alt={rec.name} className="absolute inset-0 w-full h-full object-cover opacity-90" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                    <ImageWithFallback src={rec.image} alt={rec.name} className="absolute inset-0 w-full h-full object-cover opacity-90" />
                   )}
                 </div>
                 <div className="p-3 text-sm font-semibold text-bone/90 text-center">
