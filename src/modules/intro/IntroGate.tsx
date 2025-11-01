@@ -9,7 +9,6 @@ export default function IntroGate({ children }: IntroGateProps) {
   const { pathname } = useLocation()
   const skipIntro = pathname.startsWith('/policy')
   const [showIntro, setShowIntro] = useState(() => {
-    // Check if intro was already shown this session
     if (typeof window !== 'undefined' && sessionStorage.getItem('introSeen') === 'true') return false
     return true
   })
@@ -17,116 +16,40 @@ export default function IntroGate({ children }: IntroGateProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
   const [errorText, setErrorText] = useState<string | null>(null)
-  const [videoReady, setVideoReady] = useState(false)
-  const [videoLoading, setVideoLoading] = useState(true)
 
   const baseUrl: string = ((import.meta as any)?.env?.BASE_URL as string) || '/'
 
-  // Prepare element without fetching data to avoid pre-download/IDM; enable ENTER immediately
+  // Load video and show first frame
   useEffect(() => {
     const v = videoRef.current
     if (!v || !showIntro) return
-    let timeoutId: ReturnType<typeof setTimeout>
     
-    const ensureFirstFrame = () => {
+    v.preload = 'auto'
+    v.muted = true
+    
+    const showFirstFrame = () => {
       if (v) {
-        // Force seek to 0 to show first frame on mobile
         v.currentTime = 0
         v.pause()
-        // Small delay then seek again to ensure frame is rendered
-        timeoutId = setTimeout(() => {
-          if (v && v.readyState >= 2) { // HAVE_CURRENT_DATA
-            v.currentTime = 0
-            v.pause()
-          }
-        }, 50)
       }
     }
     
-    try {
-      // Load video to show first frame (paused and blurred)
-      v.preload = 'auto'
-      v.muted = true
-      v.currentTime = 0
-      v.pause()
-      
-      // Force load on mobile to display first frame
-      v.load()
-      
-      // Set up handlers to ensure first frame shows
-      v.addEventListener('loadeddata', ensureFirstFrame, { once: true })
-      v.addEventListener('canplay', ensureFirstFrame, { once: true })
-      
-      return () => {
-        v.removeEventListener('loadeddata', ensureFirstFrame)
-        v.removeEventListener('canplay', ensureFirstFrame)
-        if (timeoutId) clearTimeout(timeoutId)
-      }
-    } catch {}
+    v.addEventListener('loadeddata', showFirstFrame)
+    v.load()
+    
+    return () => {
+      v.removeEventListener('loadeddata', showFirstFrame)
+    }
   }, [showIntro])
-
-  // Handle video loaded - ensure first frame is visible
-  const handleLoadedMetadata = () => {
-    const v = videoRef.current
-    if (v) {
-      setVideoLoading(false)
-      // Set to first frame and ensure it's displayed
-      v.currentTime = 0
-      v.muted = true
-      v.pause()
-      // Force seek to show first frame on mobile
-      setTimeout(() => {
-        if (v) {
-          v.currentTime = 0
-          v.pause()
-        }
-      }, 100)
-    }
-  }
-
-  const handleCanPlay = () => {
-    const v = videoRef.current
-    if (v) {
-      setVideoLoading(false)
-      setVideoReady(true)
-      // Ensure first frame is displayed
-      v.currentTime = 0
-      v.muted = true
-      v.pause()
-    }
-  }
-
-  const handleLoadedData = () => {
-    const v = videoRef.current
-    if (v) {
-      // Show first frame immediately
-      v.currentTime = 0
-      v.muted = true
-      v.pause()
-      setVideoReady(true)
-      setVideoLoading(false)
-    }
-  }
-
-  const handleSeeked = () => {
-    // First frame should now be visible
-    setVideoReady(true)
-    setVideoLoading(false)
-    const v = videoRef.current
-    if (v) {
-      v.pause()
-      // Ensure video stays visible (not black) on mobile
-      v.style.opacity = '1'
-    }
-  }
 
   const startVideo = async () => {
     const v = videoRef.current
     if (!v) return
+    
     setIsStarting(true)
+    setErrorText(null)
+    
     try {
-      setErrorText(null)
-      // Reset to start and unmute on user gesture so audio plays
       v.currentTime = 0
       v.muted = false
       v.volume = 1
@@ -135,7 +58,7 @@ export default function IntroGate({ children }: IntroGateProps) {
       setIsStarting(false)
     } catch (err) {
       setIsStarting(false)
-      setErrorText('Unable to start video. Check codec/support or try again.')
+      setErrorText('Unable to start video. Please try again or skip.')
       console.error('Play error:', err)
     }
   }
@@ -156,36 +79,22 @@ export default function IntroGate({ children }: IntroGateProps) {
           ref={videoRef}
           src={`${baseUrl}intro/intro.mp4`}
           className={`w-full h-full object-cover transition-[filter] duration-300 ${isPlaying ? '' : 'blur-md'}`}
-          style={{ 
-            display: 'block',
-            visibility: 'visible',
-            backgroundColor: 'transparent',
-            opacity: videoReady ? 1 : 0.8,
-            minHeight: '100%',
-            minWidth: '100%'
-          }}
           onEnded={endIntro}
-          onLoadedMetadata={handleLoadedMetadata}
-          onLoadedData={handleLoadedData}
-          onCanPlay={handleCanPlay}
-          onSeeked={handleSeeked}
-          onError={(e) => {
-            setVideoLoading(false)
-            setErrorText('Intro video failed to load. You can still skip manually.')
-            console.error('Video error:', e)
+          onLoadedData={() => {
+            const v = videoRef.current
+            if (v) {
+              v.currentTime = 0
+              v.pause()
+            }
           }}
-          onLoadStart={() => setVideoLoading(true)}
+          onError={() => {
+            setErrorText('Video failed to load. You can skip manually.')
+          }}
           playsInline
           preload="auto"
-          // Keep paused until user clicks ENTER - but show first frame
           muted
           controls={false}
         />
-        {videoLoading && !errorText && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <div className="text-white/60 text-sm">Loading video...</div>
-          </div>
-        )}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <button
             onClick={startVideo}
@@ -212,5 +121,3 @@ export default function IntroGate({ children }: IntroGateProps) {
     </div>
   )
 }
-
-
