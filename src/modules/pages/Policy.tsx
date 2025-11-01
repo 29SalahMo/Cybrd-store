@@ -37,11 +37,9 @@ export function ShippingReturns() {
       <section>
         <h2 className="text-xl font-semibold text-bone mb-3 mt-6">Shipping</h2>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Orders ship to <strong>Cairo & Giza only</strong> within <strong>2–5 business days</strong>.</li>
+          <li>Orders ship to <strong>Cairo & Giza only</strong> within <strong>3–7 business days</strong>.</li>
           <li>You'll receive a tracking number via email once your order is dispatched.</li>
           <li>Processing time: 1–2 business days after order confirmation.</li>
-          <li>Free shipping on orders over 500 LE.</li>
-          <li>Standard shipping fee: 50 LE for orders under 500 LE.</li>
         </ul>
       </section>
       
