@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export default function Footer() {
   const [credit, setCredit] = useState<{text: string, url: string}>({text: '', url: ''})
@@ -25,9 +26,9 @@ export default function Footer() {
           )}
         </div>
         <ul className="space-y-2">
-          <li><a className="hover:text-neon" href="/policy/shipping-returns">Shipping & Returns</a></li>
-          <li><a className="hover:text-neon" href="/policy/privacy">Privacy</a></li>
-          <li><a className="hover:text-neon" href="/policy/terms">Terms</a></li>
+          <li><Link to="/policy/shipping-returns" className="hover:text-neon transition-colors">Shipping & Returns</Link></li>
+          <li><Link to="/policy/privacy" className="hover:text-neon transition-colors">Privacy</Link></li>
+          <li><Link to="/policy/terms" className="hover:text-neon transition-colors">Terms</Link></li>
         </ul>
         <div>
           <p className="mb-2">Join the drop list</p>
