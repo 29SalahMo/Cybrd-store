@@ -17,7 +17,7 @@ export function PolicyLayout({ title, description, children }: Props) {
         title={`${title} — C¥BRD`} 
         description={description || `${title} for C¥BRD. Review our policies and terms.`}
       />
-      <div className="max-w-3xl mx-auto px-4 py-12">
+      <div className="max-w-3xl mx-auto px-4 py-12" style={{ position: 'relative', zIndex: 1 }}>
         <Breadcrumbs />
         <h1 className="font-display text-3xl mb-6">{title}</h1>
         <div className="prose prose-invert max-w-none text-bone/80 leading-relaxed space-y-4">
