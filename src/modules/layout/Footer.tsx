@@ -12,7 +12,7 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="mt-16 border-t border-white/10">
+    <footer className="mt-16 border-t border-white/10" style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}>
       <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8 text-sm text-bone/70">
         <div>
           <div className="font-display text-xl">
@@ -25,10 +25,46 @@ export default function Footer() {
             <p className="mt-2 text-xs text-bone/50">3D hoodie courtesy of <a className="underline hover:text-neon" href={credit.url || '#'} target="_blank" rel="noreferrer">{credit.text}</a></p>
           )}
         </div>
-        <ul className="space-y-2">
-          <li><Link to="/policy/shipping-returns" className="hover:text-neon transition-colors">Shipping & Returns</Link></li>
-          <li><Link to="/policy/privacy" className="hover:text-neon transition-colors">Privacy</Link></li>
-          <li><Link to="/policy/terms" className="hover:text-neon transition-colors">Terms</Link></li>
+        <ul className="space-y-2" style={{ position: 'relative', zIndex: 10 }}>
+          <li>
+            <Link 
+              to="/policy/shipping-returns" 
+              onClick={(e) => {
+                console.log('[FOOTER] Clicked shipping-returns link')
+                e.stopPropagation()
+              }}
+              className="hover:text-neon transition-colors cursor-pointer inline-block"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
+            >
+              Shipping & Returns
+            </Link>
+          </li>
+          <li>
+            <Link 
+              to="/policy/privacy" 
+              onClick={(e) => {
+                console.log('[FOOTER] Clicked privacy link')
+                e.stopPropagation()
+              }}
+              className="hover:text-neon transition-colors cursor-pointer inline-block"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
+            >
+              Privacy
+            </Link>
+          </li>
+          <li>
+            <Link 
+              to="/policy/terms" 
+              onClick={(e) => {
+                console.log('[FOOTER] Clicked terms link')
+                e.stopPropagation()
+              }}
+              className="hover:text-neon transition-colors cursor-pointer inline-block"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
+            >
+              Terms
+            </Link>
+          </li>
         </ul>
         <div>
           <p className="mb-2">Join the drop list</p>
