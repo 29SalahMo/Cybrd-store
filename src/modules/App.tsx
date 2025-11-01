@@ -24,6 +24,7 @@ import { ToastProvider, ToastViewport, useToast } from './ui/ToastContext'
 function GlobalErrorHandler({ children }: { children: React.ReactNode }) {
   const { show } = useToast()
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const onError = (event: ErrorEvent) => {
       console.error('[ERROR]', event.message)
       if (event.message?.includes('fetch') || event.message?.includes('network') || event.message?.includes('Network')) {

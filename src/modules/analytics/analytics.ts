@@ -1,4 +1,14 @@
-type EventName = 'view_item' | 'add_to_cart' | 'begin_checkout' | 'login' | 'signup' | 'purchase'
+type EventName =
+  | 'view_item'
+  | 'add_to_cart'
+  | 'begin_checkout'
+  | 'login'
+  | 'signup'
+  | 'purchase'
+  | 'cart_open'
+  | 'select_color'
+  | 'select_size'
+  | 'remove_from_wishlist'
 
 export function logEvent(name: EventName, params: Record<string, any> = {}) {
   try {

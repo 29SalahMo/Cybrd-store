@@ -8,9 +8,12 @@ type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
   sizes?: string // Sizes attribute
 }
 
-export default function ImageWithFallback({ skeletonClassName, fallbackClassName, onError, onLoad, eager, srcSet, sizes, ...rest }: Props) {
+export default function ImageWithFallback({ skeletonClassName, fallbackClassName, onError, onLoad, eager, srcSet: propSrcSet, sizes: propSizes, ...rest }: Props) {
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
+  // Use provided srcSet/sizes, or fall back to defaults (note: rest won't have srcSet/sizes since we destructured them)
+  const finalSrcSet = propSrcSet
+  const finalSizes = propSizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
   return (
     <>
       {!loaded && !failed && (
@@ -18,10 +21,10 @@ export default function ImageWithFallback({ skeletonClassName, fallbackClassName
       )}
       {!failed ? (
         <img
-          {...rest}
+          {...(rest as React.ImgHTMLAttributes<HTMLImageElement>)}
           loading={eager ? 'eager' : (rest.loading || 'lazy')}
-          srcSet={srcSet || rest.srcSet}
-          sizes={sizes || rest.sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+          srcSet={finalSrcSet}
+          sizes={finalSizes}
           onLoad={(e)=>{ setLoaded(true); onLoad?.(e) }}
           onError={(e)=>{ setFailed(true); onError?.(e) }}
           style={{ ...(rest.style||{}), display: failed ? 'none' : undefined }}

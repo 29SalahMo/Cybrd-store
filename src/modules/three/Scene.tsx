@@ -100,8 +100,15 @@ export default function Scene({ children }: { children?: React.ReactNode }) {
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY)
+    // Initialize scroll position immediately
+    setScrollY(window.scrollY)
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    // Also listen for resize in case layout changes
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -118,7 +125,7 @@ export default function Scene({ children }: { children?: React.ReactNode }) {
     <div className="relative">
       {/* Background 3D layer */}
       {webgl && (
-        <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="fixed inset-0 -z-[999] pointer-events-none" style={{ zIndex: -999 }}>
           <Canvas camera={{ position: [0, 0.6, 3.6], fov: 50 }} dpr={[1, 2]}>
             <Suspense fallback={null}>
               <BackgroundHoodie scrollY={scrollY} />
