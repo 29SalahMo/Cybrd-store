@@ -8,15 +8,9 @@ type IntroGateProps = {
 export default function IntroGate({ children }: IntroGateProps) {
   const { pathname } = useLocation()
   const skipIntro = pathname.startsWith('/policy')
-  const [isMobile, setIsMobile] = useState(false)
   const [showIntro, setShowIntro] = useState(() => {
     // Check if intro was already shown this session
     if (typeof window !== 'undefined' && sessionStorage.getItem('introSeen') === 'true') return false
-    // Skip intro on mobile devices for better UX
-    if (typeof window !== 'undefined') {
-      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768
-      if (mobile) return false
-    }
     return true
   })
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -26,34 +20,10 @@ export default function IntroGate({ children }: IntroGateProps) {
 
   const baseUrl: string = ((import.meta as any)?.env?.BASE_URL as string) || '/'
 
-  // Detect mobile on mount
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768
-      setIsMobile(mobile)
-      if (mobile && showIntro) {
-        setShowIntro(false)
-        sessionStorage.setItem('introSeen', 'true')
-      }
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [showIntro])
-
   // Prepare element without fetching data to avoid pre-download/IDM; enable ENTER immediately
   useEffect(() => {
     const v = videoRef.current
     if (!v || !showIntro) return
-    
-    // Auto-skip after 5 seconds if video doesn't load or start
-    const timeout = setTimeout(() => {
-      if (!isPlaying && !isStarting) {
-        setShowIntro(false)
-        sessionStorage.setItem('introSeen', 'true')
-      }
-    }, 5000)
-    
     try {
       v.preload = 'metadata'
       // Ensure video stays paused - no autoplay attempts
@@ -61,9 +31,7 @@ export default function IntroGate({ children }: IntroGateProps) {
       v.pause()
       v.currentTime = 0
     } catch {}
-    
-    return () => clearTimeout(timeout)
-  }, [showIntro, isPlaying, isStarting])
+  }, [showIntro])
 
   const startVideo = async () => {
     const v = videoRef.current
@@ -101,11 +69,7 @@ export default function IntroGate({ children }: IntroGateProps) {
           className={`w-full h-full object-cover transition-[filter] duration-300 ${isPlaying ? '' : 'blur-md'}`}
           onEnded={endIntro}
           onError={() => {
-            setErrorText('Intro video failed to load.')
-            // Auto-skip if video fails to load
-            setTimeout(() => {
-              endIntro()
-            }, 2000)
+            setErrorText('Intro video failed to load. You can still skip manually.')
           }}
           playsInline
           preload="metadata"
