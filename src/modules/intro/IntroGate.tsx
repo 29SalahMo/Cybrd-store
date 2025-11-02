@@ -98,8 +98,8 @@ export default function IntroGate({ children }: IntroGateProps) {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <button
             onClick={startVideo}
-            disabled={isStarting}
-            className={`pointer-events-auto px-6 py-3 md:px-10 md:py-4 border-2 border-white/60 text-white font-extrabold tracking-widest text-2xl md:text-5xl transition-opacity duration-200 touch-manipulation ${isStarting ? 'opacity-0' : 'opacity-100'}`}
+            disabled={isStarting || isPlaying}
+            className={`pointer-events-auto px-6 py-3 md:px-10 md:py-4 border-2 border-white/60 text-white font-extrabold tracking-widest text-2xl md:text-5xl transition-opacity duration-200 touch-manipulation ${isStarting || isPlaying ? 'opacity-0' : 'opacity-100'}`}
             style={{ fontFamily: 'Oswald, system-ui, sans-serif', minHeight: '44px', minWidth: '120px' }}
           >
             ENTER
