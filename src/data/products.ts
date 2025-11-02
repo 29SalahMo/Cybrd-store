@@ -14,31 +14,35 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
   const id = i + 1
   return {
     id,
-    name: id === 1 ? 'Flame Angel' : id === 2 ? 'Skelton' : id === 3 ? 'Rhuds' : id === 4 ? 'Vampire' : id === 5 ? 'Porshe' : id === 6 ? 'Gang' : id === 7 ? 'Ghost' : id === 8 ? 'subra' : id === 9 ? 'CyButter' : id === 10 ? 'Univrse' : `C¥BRD Hoodie ${id}`,
+    name: id === 1 ? 'Flame Angel' : id === 2 ? 'Skelton' : id === 3 ? 'Rhuds' : id === 4 ? 'Dollar' : id === 5 ? 'Porshe' : id === 6 ? 'Gang' : id === 7 ? 'Ghost' : id === 8 ? 'subra' : id === 9 ? 'CyButter' : id === 10 ? 'Univrse' : id === 11 ? 'Vampire' : id === 12 ? 'Love' : `C¥BRD Hoodie ${id}`,
     price: PRICE_LE,
     image:
       id === 1 ? `/products/hoodie-1-front.png` :
       id === 2 ? `/products/hoodie-2-front.png` :
       id === 3 ? `/products/hoodie-3-front-black.png` :
-      id === 4 ? `/products/hoodie-4-front-black.png` :
+      id === 4 ? `/products/hoodie-4-front.png` :
       id === 5 ? `/products/hoodie-5-front-black.png` :
       id === 6 ? `/products/hoodie-6-front.jpg` :
       id === 7 ? `/products/hoodie-7-front.png` :
       id === 8 ? `/products/hoodie-8-front.png` :
       id === 9 ? `/products/hoodie-9-front-white.png` :
       id === 10 ? `/products/hoodie-10-front-white.png` :
+      id === 11 ? `/products/hoodie-11-front-black.png` :
+      id === 12 ? `/products/hoodie-12-front.png` :
       `/products/hoodie-${id}.jpg`,
     backImage:
       id === 1 ? `/products/hoodie-1-back.png` :
       id === 2 ? `/products/hoodie-2-back.png` :
       id === 3 ? `/products/hoodie-3-back-black.png` :
-      id === 4 ? `/products/hoodie-4-back-black.png` :
+      id === 4 ? `/products/hoodie-4-back.png` :
       id === 5 ? `/products/hoodie-5-back-black.png` :
       id === 6 ? `/products/hoodie-6-back.png` :
       id === 7 ? `/products/hoodie-7-back.png` :
       id === 8 ? `/products/hoodie-8-back.png` :
       id === 9 ? `/products/hoodie-9-back-white.png` :
       id === 10 ? `/products/hoodie-10-back-white.png` :
+      id === 11 ? `/products/hoodie-11-back-black.png` :
+      id === 12 ? `/products/hoodie-12-back.png` :
       undefined,
     gallery: id === 1 ? [
       '/products/hoodie-1-front.png',
@@ -60,10 +64,8 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
       '/products/hoodie-3-back-white.png',
       // Add more images here: '/products/hoodie-3-detail-1.png',
     ] : id === 4 ? [
-      '/products/hoodie-4-front-black.png',
-      '/products/hoodie-4-back-black.png',
-      '/products/hoodie-4-front-white.png',
-      '/products/hoodie-4-back-white.png',
+      '/products/hoodie-4-front.png',
+      '/products/hoodie-4-back.png',
       // Add more images here: '/products/hoodie-4-detail-1.png',
     ] : id === 5 ? [
       '/products/hoodie-5-front-black.png',
@@ -94,11 +96,21 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
       '/products/hoodie-10-front-white.png',
       '/products/hoodie-10-back-white.png',
       // Add more images here: '/products/hoodie-10-detail-1.png',
+    ] : id === 11 ? [
+      '/products/hoodie-11-front-black.png',
+      '/products/hoodie-11-back-black.png',
+      '/products/hoodie-11-front-white.png',
+      '/products/hoodie-11-back-white.png',
+      // Add more images here: '/products/hoodie-11-detail-1.png',
+    ] : id === 12 ? [
+      '/products/hoodie-12-front.png',
+      '/products/hoodie-12-back.png',
+      // Add more images here: '/products/hoodie-12-detail-1.png',
     ] : [
       // Default gallery structure - add images for other products here
-      // '/products/hoodie-11-front.png',
-      // '/products/hoodie-11-back.png',
-      // '/products/hoodie-11-detail-1.png',
+      // '/products/hoodie-13-front.png',
+      // '/products/hoodie-13-back.png',
+      // '/products/hoodie-13-detail-1.png',
     ],
     variants: id === 3 ? {
       black: { 
@@ -144,28 +156,18 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
           // '/products/hoodie-2-white-detail-1.png',
         ]
       }
-    } : id === 4 ? {
+    } : id === 4 ? ({
       black: { 
-        front: '/products/hoodie-4-front-black.png', 
-        back: '/products/hoodie-4-back-black.png',
+        front: '/products/hoodie-4-front.png', 
+        back: '/products/hoodie-4-back.png',
         gallery: [
-          '/products/hoodie-4-front-black.png', 
-          '/products/hoodie-4-back-black.png',
+          '/products/hoodie-4-front.png', 
+          '/products/hoodie-4-back.png',
           // Add more black variant images here:
           // '/products/hoodie-4-black-detail-1.png',
         ]
-      },
-      white: { 
-        front: '/products/hoodie-4-front-white.png', 
-        back: '/products/hoodie-4-back-white.png',
-        gallery: [
-          '/products/hoodie-4-front-white.png', 
-          '/products/hoodie-4-back-white.png',
-          // Add more white variant images here:
-          // '/products/hoodie-4-white-detail-1.png',
-        ]
       }
-    } : id === 5 ? {
+    } as Record<string, { front: string; back: string; gallery?: string[] }>) : id === 5 ? {
       black: { 
         front: '/products/hoodie-5-front-black.png', 
         back: '/products/hoodie-5-back-black.png',
@@ -260,6 +262,38 @@ export const products: Product[] = Array.from({ length: 14 }).map((_, i) => {
           '/products/hoodie-10-back-white.png',
           // Add more white variant images here:
           // '/products/hoodie-10-white-detail-1.png',
+        ]
+      }
+    } as Record<string, { front: string; back: string; gallery?: string[] }>) : id === 11 ? {
+      black: { 
+        front: '/products/hoodie-11-front-black.png', 
+        back: '/products/hoodie-11-back-black.png',
+        gallery: [
+          '/products/hoodie-11-front-black.png', 
+          '/products/hoodie-11-back-black.png',
+          // Add more black variant images here:
+          // '/products/hoodie-11-black-detail-1.png',
+        ]
+      },
+      white: { 
+        front: '/products/hoodie-11-front-white.png', 
+        back: '/products/hoodie-11-back-white.png',
+        gallery: [
+          '/products/hoodie-11-front-white.png', 
+          '/products/hoodie-11-back-white.png',
+          // Add more white variant images here:
+          // '/products/hoodie-11-white-detail-1.png',
+        ]
+      }
+    } : id === 12 ? ({
+      white: { 
+        front: '/products/hoodie-12-front.png', 
+        back: '/products/hoodie-12-back.png',
+        gallery: [
+          '/products/hoodie-12-front.png', 
+          '/products/hoodie-12-back.png',
+          // Add more white variant images here:
+          // '/products/hoodie-12-white-detail-1.png',
         ]
       }
     } as Record<string, { front: string; back: string; gallery?: string[] }>) : undefined
