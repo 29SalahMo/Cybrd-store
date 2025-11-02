@@ -8,27 +8,40 @@ export default function Breadcrumbs() {
     const items: Array<{ label: string; path: string }> = [{ label: 'Home', path: '/' }]
     
     let currentPath = ''
-    paths.forEach((segment, idx) => {
-      currentPath += `/${segment}`
-      // Convert segment to readable label
-      let label = segment
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase())
+    let i = 0
+    while (i < paths.length) {
+      const segment = paths[i]
+      const isProductWithId = segment === 'product' && paths[i + 1]
+      const isPolicyWithSub = segment === 'policy' && paths[i + 1]
       
-      // Special cases
-      if (segment === 'product' && paths[idx + 1]) {
-        label = `Product ${paths[idx + 1]}`
-      } else if (segment === 'policy') {
-        if (paths[idx + 1]) {
-          label = paths[idx + 1].replace(/-/g, ' ')
-            .replace(/\b\w/g, l => l.toUpperCase())
-        } else {
+      if (isProductWithId) {
+        // Combine product and ID into one breadcrumb
+        currentPath += `/${segment}/${paths[i + 1]}`
+        const label = `Product ${paths[i + 1]}`
+        items.push({ label, path: currentPath })
+        i += 2 // Skip both 'product' and the ID
+      } else if (isPolicyWithSub) {
+        // Combine policy and sub-page into one breadcrumb
+        currentPath += `/${segment}/${paths[i + 1]}`
+        const label = paths[i + 1].replace(/-/g, ' ')
+          .replace(/\b\w/g, l => l.toUpperCase())
+        items.push({ label, path: currentPath })
+        i += 2 // Skip both 'policy' and the sub-page
+      } else {
+        // Regular segment
+        currentPath += `/${segment}`
+        let label = segment
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, l => l.toUpperCase())
+        
+        if (segment === 'policy') {
           label = 'Policies'
         }
+        
+        items.push({ label, path: currentPath })
+        i++
       }
-      
-      items.push({ label, path: currentPath })
-    })
+    }
     
     return items
   }, [location.pathname])
