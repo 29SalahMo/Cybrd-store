@@ -15,6 +15,9 @@ const Contact = lazy(() => import('./pages/Contact'))
 const Cart = lazy(() => import('./pages/Cart'))
 const Checkout = lazy(() => import('./pages/Checkout'))
 const Login = lazy(() => import('./pages/Login'))
+const AdminLogin = lazy(() => import('./pages/AdminLogin'))
+const AdminOrders = lazy(() => import('./pages/AdminOrders'))
+const AdminProducts = lazy(() => import('./pages/AdminProducts'))
 const Signup = lazy(() => import('./pages/Signup'))
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'))
 const Wishlist = lazy(() => import('./pages/Wishlist'))
@@ -88,6 +91,9 @@ export default function App() {
                 <Route path="/policy/privacy" element={<PrivacyPolicy />} />
                 <Route path="/policy/terms" element={<TermsOfService />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
