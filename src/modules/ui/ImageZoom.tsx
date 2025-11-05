@@ -15,10 +15,17 @@ export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: I
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, posX: 0, posY: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
+  const touchDragRef = useRef(false)
+  const touchTimeoutRef = useRef<number | null>(null)
+  const suppressNextClickRef = useRef(false)
 
   // Toggle zoom on click
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return
+    if (suppressNextClickRef.current) {
+      suppressNextClickRef.current = false
+      return
+    }
     
     // Prevent click if we just finished dragging
     if (isDragging) {
@@ -32,13 +39,13 @@ export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: I
       const clickX = ((e.clientX - rect.left) / rect.width) * 100
       const clickY = ((e.clientY - rect.top) / rect.height) * 100
       
-      // Calculate offset to center the clicked point
-      // When zoomed 2x, image is 200% size, so it extends 50% beyond container on each side
-      // To center click point: offset = (click - 50) * zoomScale
+      // Center the clicked point taking zoom into account
       const maxOffset = 50 * (zoomScale - 1)
+      const offsetX = (50 - clickX) * (zoomScale - 1)
+      const offsetY = (50 - clickY) * (zoomScale - 1)
       setPosition({
-        x: Math.max(-maxOffset, Math.min(maxOffset, (clickX - 50) * zoomScale)),
-        y: Math.max(-maxOffset, Math.min(maxOffset, (clickY - 50) * zoomScale))
+        x: Math.max(-maxOffset, Math.min(maxOffset, offsetX)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, offsetY))
       })
     } else {
       // If zoomed, deactivate on click
@@ -58,6 +65,81 @@ export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: I
       posX: position.x,
       posY: position.y
     })
+  }
+
+  // --- Touch support ---
+  const getTouchPointPercent = (pt: { clientX: number; clientY: number }, rect: DOMRect) => {
+    const x = ((pt.clientX - rect.left) / rect.width) * 100
+    const y = ((pt.clientY - rect.top) / rect.height) * 100
+    return { x, y }
+  }
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return
+
+    if (!isZoomed) {
+      // Single tap: enter zoom centered at touch point
+      const touch = e.touches[0]
+      if (!touch) return
+      const rect = containerRef.current.getBoundingClientRect()
+      const { x, y } = getTouchPointPercent(touch, rect)
+      const maxOffset = 50 * (zoomScale - 1)
+      setIsZoomed(true)
+      const offsetX = (50 - x) * (zoomScale - 1)
+      const offsetY = (50 - y) * (zoomScale - 1)
+      setPosition({
+        x: Math.max(-maxOffset, Math.min(maxOffset, offsetX)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, offsetY))
+      })
+      // prevent click emulation
+      e.preventDefault()
+      suppressNextClickRef.current = true
+      return
+    }
+
+    // When already zoomed: start panning on first touch
+    const touch = e.touches[0]
+    if (!touch) return
+    const rect = containerRef.current.getBoundingClientRect()
+    touchDragRef.current = true
+    setIsDragging(true)
+    setDragStart({
+      x: touch.clientX,
+      y: touch.clientY,
+      posX: position.x,
+      posY: position.y
+    })
+    // prevent scrolling while panning
+    e.preventDefault()
+  }
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isZoomed || !containerRef.current) return
+    const touch = e.touches[0]
+    if (!touch) return
+
+    // Panning with one finger
+    if (touchDragRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      const deltaXPixels = touch.clientX - dragStart.x
+      const deltaYPixels = touch.clientY - dragStart.y
+      const deltaXPercent = (deltaXPixels / rect.width) * 100
+      const deltaYPercent = (deltaYPixels / rect.height) * 100
+      const maxOffset = 50 * (zoomScale - 1)
+      setPosition({
+        x: Math.max(-maxOffset, Math.min(maxOffset, dragStart.posX + deltaXPercent)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, dragStart.posY + deltaYPercent))
+      })
+      setIsDragging(true)
+      e.preventDefault()
+      suppressNextClickRef.current = true
+    }
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    // End panning
+    touchDragRef.current = false
+    setIsDragging(false)
   }
 
   // Handle drag - use global mouse move for better tracking
@@ -133,12 +215,15 @@ export default function ImageZoom({ src, alt, className = '', zoomScale = 2 }: I
     <div
       ref={containerRef}
       className={`relative overflow-hidden ${isZoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'} ${className}`}
-      style={{ position: className.includes('absolute') ? 'absolute' : 'relative' }}
+      style={{ position: className.includes('absolute') ? 'absolute' : 'relative', touchAction: isZoomed ? 'none' : 'manipulation' }}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       role="img"
       aria-label={alt}
     >
