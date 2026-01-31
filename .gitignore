@@ -6,6 +6,9 @@
 !web
 !web/**
 !README.md
+# Root app (for Vercel build when Root Directory not set) – allow Admin pages so build passes
+!src
+!src/**
 
 # Node artifacts anywhere (extra safety if web/ nested installs leave traces)
 **/node_modules/
