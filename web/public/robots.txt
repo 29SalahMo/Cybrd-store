@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /checkout
+Disallow: /cart
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://cybrd-store.vercel.app/sitemap.xml
+

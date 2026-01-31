@@ -27,4 +27,10 @@ Build
 npm run build && npm run preview
 ```
 
+Deploy (Vercel)
+1. Connect this repo to Vercel (GitHub → New Project).
+2. Set **Root Directory** to `web` (Project Settings → General).
+3. Leave Build Command as `npm run build`, Output Directory as `dist`.
+4. Deploy. The app in `web/` will build and deploy with SPA rewrites from `web/vercel.json`.
+
 
