@@ -5,18 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useWishlist } from '../wishlist/WishlistContext'
 import MiniCart from '../cart/MiniCart'
 
-function BrandMark() {
-  return (
-    <div className="absolute left-1/2 -translate-x-1/2 top-12">
-      <div className="w-12 h-12 rounded-full border border-white/10 glass shadow-glow floating flex items-center justify-center">
-        <div className="w-8 h-8 animate-spin-slow" style={{animation: 'spin 12s linear infinite'}}>
-          {/* Served from /public/logo.png */}
-          <img src={'/logo.png'} alt="brand" className="w-8 h-8 object-contain" />
-        </div>
-      </div>
-    </div>
-  )
-}
+
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -165,7 +154,6 @@ export default function Navbar() {
           </nav>
         </div>
       </div>
-      <BrandMark />
     </header>
   )
 }

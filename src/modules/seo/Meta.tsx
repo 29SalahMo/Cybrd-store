@@ -55,8 +55,10 @@ export default function Meta({ title, description, image, url }: Props) {
     setProperty('og:description', description || 'Discover futuristic streetwear & exclusive drops at C¥BRD Store.')
     if (absoluteImage) {
       setProperty('og:image', absoluteImage)
-      setProperty('og:image:width', '1200')
-      setProperty('og:image:height', '630')
+      setProperty('og:image:url', absoluteImage)
+      setProperty('og:image:secure_url', absoluteImage)
+      setProperty('og:image:width', '1280')
+      setProperty('og:image:height', '698')
       setProperty('og:image:type', 'image/jpeg')
     }
     setProperty('og:url', fullUrl)

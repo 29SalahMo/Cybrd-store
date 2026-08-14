@@ -200,11 +200,6 @@ export default function IntroGate({ children }: IntroGateProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </button>
-
-          {/* Subtext Prompt */}
-          <span className="mt-4 text-xs md:text-sm tracking-[0.2em] text-neutral-400 font-medium uppercase transition-opacity duration-300 group-hover:text-white">
-            Click to start experience
-          </span>
         </div>
 
         {/* Video Controls (Visible during playback) */}
