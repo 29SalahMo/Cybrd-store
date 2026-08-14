@@ -6,11 +6,12 @@ import { useToast } from '../ui/ToastContext'
 import Meta from '../seo/Meta'
 import { logEvent } from '../analytics/analytics'
 import { PaymentMethodOption } from '../ui/PaymentIcons'
-import { validateName, validatePhone, validateRequired, validateEmail } from '../utils/validation'
-import { sanitizeInput, sanitizeEmail } from '../utils/sanitize'
+import { validateName, validatePhone, validateRequired } from '../utils/validation'
+import { sanitizeInput } from '../utils/sanitize'
 import { motion } from 'framer-motion'
+import { apiRequest } from '../utils/api'
 
-type PaymentMethod = 'paypal' | 'instapay' | 'vodafone' | 'visa' | 'cod'
+type CheckoutPaymentMethod = 'paypal' | 'instapay' | 'vodafone' | 'visa' | 'cod'
 
 interface ShippingAddress {
   fullName: string
@@ -21,7 +22,11 @@ interface ShippingAddress {
   country: string
 }
 
-function usePaypal(clientId?: string, total?: number, onSuccess?: () => void) {
+function usePaypal(
+  clientId?: string,
+  total?: number,
+  onSuccess?: (details: any, data?: any) => Promise<void> | void
+) {
   const [ready, setReady] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   
@@ -52,7 +57,9 @@ function usePaypal(clientId?: string, total?: number, onSuccess?: () => void) {
                 try {
                   logEvent('purchase', { method: 'paypal', items: 0, total })
                 } catch {}
-                if (onSuccess) onSuccess()
+                if (onSuccess) {
+                  return Promise.resolve(onSuccess(details, data))
+                }
               })
             },
             onError: (err: any) => {
@@ -85,7 +92,7 @@ export default function Checkout() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { show } = useToast()
-  const [method, setMethod] = useState<PaymentMethod>('paypal')
+  const [method, setMethod] = useState<CheckoutPaymentMethod>('paypal')
   const [note, setNote] = useState('')
   const [refId, setRefId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -102,6 +109,14 @@ export default function Checkout() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  const backendPaymentMethodMap: Record<CheckoutPaymentMethod, 'PAYPAL' | 'INSTAPAY' | 'VODAFONE' | 'STRIPE' | 'COD'> = {
+    paypal: 'PAYPAL',
+    instapay: 'INSTAPAY',
+    vodafone: 'VODAFONE',
+    visa: 'STRIPE',
+    cod: 'COD'
+  }
+
   useEffect(() => { document.title = 'Checkout — C¥BRD' }, [])
 
   useEffect(() => {
@@ -111,10 +126,82 @@ export default function Checkout() {
   const clientId = (import.meta as any).env?.VITE_PAYPAL_CLIENT_ID as string | undefined
   const total = useMemo(() => subtotal, [subtotal])
   
-  const handlePaypalSuccess = () => {
-    clear()
-    show('Payment successful! Order placed.', 'success')
-    navigate('/order-confirmation')
+  const markShippingFieldsTouched = () => {
+    setTouched(prev => ({
+      ...prev,
+      fullName: true,
+      phone: true,
+      address: true,
+      city: true,
+      postalCode: true
+    }))
+  }
+
+  const ensureShippingValid = () => {
+    markShippingFieldsTouched()
+    const valid = validateShipping()
+    if (!valid) {
+      show('Please fill in all required shipping fields', 'error')
+    }
+    return valid
+  }
+
+  const buildOrderPayload = (paymentMethod: CheckoutPaymentMethod, paymentReference?: string) => ({
+    shipping: {
+      fullName: sanitizeInput(shipping.fullName),
+      phone: shipping.phone.trim(),
+      address: sanitizeInput(shipping.address),
+      addressLine2: undefined,
+      city: sanitizeInput(shipping.city),
+      postalCode: shipping.postalCode.trim(),
+      country: sanitizeInput(shipping.country || 'Egypt')
+    },
+    paymentMethod: backendPaymentMethodMap[paymentMethod],
+    paymentReference: paymentReference ? sanitizeInput(paymentReference) : undefined,
+    note: note ? sanitizeInput(note) : undefined,
+    items: items.map(item => ({
+      productId: item.id,
+      size: item.size,
+      quantity: item.quantity
+    }))
+  })
+
+  const submitOrder = async (paymentMethod: CheckoutPaymentMethod, paymentReference?: string) => {
+    if (!ensureShippingValid()) {
+      return false
+    }
+    if (items.length === 0) {
+      show('Your cart is empty.', 'error')
+      return false
+    }
+    setIsSubmitting(true)
+    try {
+      await apiRequest('/orders/create', {
+        method: 'POST',
+        body: JSON.stringify(buildOrderPayload(paymentMethod, paymentReference))
+      })
+      try {
+        logEvent('purchase', { method: paymentMethod, items: items.length, total })
+      } catch {}
+      clear()
+      show('Order placed successfully', 'success')
+      navigate('/order-confirmation')
+      return true
+    } catch (err: any) {
+      const message = err?.message || 'Failed to place order. Please try again.'
+      show(message, 'error')
+      throw err
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+  
+  const handlePaypalSuccess = async (details: any) => {
+    const reference =
+      details?.id ||
+      details?.purchase_units?.[0]?.payments?.captures?.[0]?.id ||
+      details?.purchase_units?.[0]?.invoice_id
+    await submitOrder('paypal', reference)
   }
   
   const { ready: paypalReady, containerRef: paypalContainerRef } = usePaypal(clientId, total, handlePaypalSuccess)
@@ -163,56 +250,24 @@ export default function Checkout() {
   }
 
   const placeManualOrder = async () => {
-    setTouched({
-      fullName: true, phone: true, address: true, city: true, postalCode: true, refId: true
-    })
-    
-    if (!validateShipping()) {
-      show('Please fill in all required shipping fields', 'error')
-      return
-    }
-    
+    setTouched(prev => ({ ...prev, refId: true }))
     if (!refId.trim()) {
       setErrors(prev => ({ ...prev, refId: 'Transaction reference ID is required' }))
       show('Please enter your transaction reference ID', 'error')
       return
     }
-    
-    setIsSubmitting(true)
     try {
-      clear()
-      console.log('[ORDER]', { method, refId: sanitizeInput(refId), note: sanitizeInput(note), shipping, items, total })
-      logEvent('purchase', { method, items: items.length, total })
-      show('Order placed successfully', 'success')
-      navigate('/order-confirmation')
-    } catch (err) {
-      show('Failed to place order. Please try again.', 'error')
-    } finally {
-      setIsSubmitting(false)
+      await submitOrder(method, refId)
+    } catch {
+      // Errors surfaced via toast in submitOrder
     }
   }
   
   const placeCodOrder = async () => {
-    setTouched({
-      fullName: true, phone: true, address: true, city: true, postalCode: true
-    })
-    
-    if (!validateShipping()) {
-      show('Please fill in all required shipping fields', 'error')
-      return
-    }
-    
-    setIsSubmitting(true)
     try {
-      clear()
-      console.log('[ORDER]', { method: 'cod', shipping, items, total })
-      logEvent('purchase', { method: 'cod', items: items.length, total })
-      show('Order placed successfully (Cash on Delivery)', 'success')
-      navigate('/order-confirmation')
-    } catch (err) {
-      show('Failed to place order. Please try again.', 'error')
-    } finally {
-      setIsSubmitting(false)
+      await submitOrder('cod')
+    } catch {
+      // Errors surfaced via toast in submitOrder
     }
   }
 

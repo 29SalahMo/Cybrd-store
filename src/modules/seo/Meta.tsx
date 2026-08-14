@@ -11,8 +11,9 @@ export default function Meta({ title, description, image, url }: Props) {
   useEffect(() => {
     if (title) document.title = title
     
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-    const fullUrl = url || (typeof window !== 'undefined' ? window.location.href : '')
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const baseUrl = origin.includes('localhost') || !origin ? 'https://cybrd-streetwear.vercel.app' : origin
+    const fullUrl = url || (typeof window !== 'undefined' ? window.location.href : 'https://cybrd-streetwear.vercel.app/')
     
     // Helper to create absolute URL for images
     const getAbsoluteImageUrl = (img?: string): string => {
@@ -23,7 +24,7 @@ export default function Meta({ title, description, image, url }: Props) {
       return `${baseUrl}/${img}`
     }
     
-    const absoluteImage = getAbsoluteImageUrl(image)
+    const absoluteImage = getAbsoluteImageUrl(image || '/og-image.jpeg')
     
     const set = (name: string, content?: string) => {
       if (!content) return
@@ -47,16 +48,16 @@ export default function Meta({ title, description, image, url }: Props) {
     }
     
     // Basic meta tags
-    set('description', description)
+    set('description', description || 'C¥BRD Cyberpunk Streetwear Store')
     
     // Open Graph tags
-    setProperty('og:title', title)
-    setProperty('og:description', description)
+    setProperty('og:title', title || 'C¥BRD | Streetwear')
+    setProperty('og:description', description || 'Discover futuristic streetwear & exclusive drops at C¥BRD Store.')
     if (absoluteImage) {
       setProperty('og:image', absoluteImage)
       setProperty('og:image:width', '1200')
       setProperty('og:image:height', '630')
-      setProperty('og:image:type', 'image/png')
+      setProperty('og:image:type', 'image/jpeg')
     }
     setProperty('og:url', fullUrl)
     setProperty('og:type', 'website')

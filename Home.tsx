@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import Scene from '../three/Scene'
-import { products } from '../../data/products'
+import Scene from './src/modules/three/Scene'
+import { products, type Product } from './src/data/products'
 
 export default function Home() {
   return (
@@ -21,7 +21,7 @@ export default function Home() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-6 pb-16">
-        {products.slice(0, 8).map((p) => (
+        {products.slice(0, 8).map((p: Product) => (
           <Link key={p.id} to={`/product/${p.id}`} className="group glass rounded-xl overflow-hidden border border-white/10 hover:shadow-glow transition">
             <div className="aspect-[4/5] bg-gradient-to-br from-black to-ink relative">
               {p.backImage ? (

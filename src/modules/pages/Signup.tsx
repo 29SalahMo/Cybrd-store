@@ -1,13 +1,15 @@
 import { FormEvent, useState, useEffect } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { useToast } from '../ui/ToastContext'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { validateEmail, validatePassword, validateName, getPasswordStrength } from '../utils/validation'
 import { sanitizeEmail, sanitizeInput } from '../utils/sanitize'
+import SocialLoginButtons from '../ui/SocialLoginButtons'
 
 export default function Signup() {
   const { signup } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -16,7 +18,34 @@ export default function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { show } = useToast()
+  
   useEffect(() => { document.title = 'Sign up — C¥BRD' }, [])
+  
+  // Handle OAuth callback
+  useEffect(() => {
+    const oauthSuccess = searchParams.get('oauthSuccess')
+    const token = searchParams.get('token')
+    if (oauthSuccess && token) {
+      localStorage.setItem('cbrd.auth.token', token)
+      // Fetch user data and update auth context
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'
+      fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.user) {
+            localStorage.setItem('cbrd.auth.v1', JSON.stringify(data.user))
+            // Trigger page reload to update AuthContext
+            window.location.href = '/'
+            show(`Logged in with ${oauthSuccess}`, 'success')
+          }
+        })
+        .catch(() => {
+          show('Failed to complete login', 'error')
+        })
+    }
+  }, [searchParams, show])
 
   const passwordStrength = password ? getPasswordStrength(password) : null
 
@@ -135,6 +164,7 @@ export default function Signup() {
         >
           {isSubmitting ? 'Creating account...' : 'Create Account'}
         </button>
+        <SocialLoginButtons />
         <div className="text-sm text-bone/70">Have an account? <Link to="/login" className="text-neon hover:underline">Login</Link></div>
       </form>
     </div>
