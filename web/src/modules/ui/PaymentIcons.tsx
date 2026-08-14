@@ -5,36 +5,63 @@ type PaymentMethod = 'paypal' | 'instapay' | 'vodafone' | 'visa' | 'cod'
 interface PaymentIconProps {
   method: PaymentMethod
   className?: string
+  size?: number
 }
 
-export function PaymentIcon({ method, className = '' }: PaymentIconProps) {
+export function PaymentIcon({ method, className = '', size = 32 }: PaymentIconProps) {
+  const iconClass = `inline-block ${className}`
+
   switch (method) {
     case 'paypal':
       return (
-        <img src="/images/social/paypal.png" alt="PayPal" className={`h-10 object-contain ${className}`} />
+        <svg width={size} height={size} viewBox="0 0 32 32" className={iconClass} aria-hidden="true">
+          <rect width="32" height="32" rx="4" fill="#003087" />
+          <path d="M12.5 10.5c-.2 1.5-.8 2.8-1.8 3.8-1 1-2.3 1.5-3.9 1.5H5.5v2.5h1.3c.5 0 .9.4.9.9s-.4.9-.9.9H4.5c-.5 0-.9-.4-.9-.9V7.5c0-.5.4-.9.9-.9h4.8c1.6 0 2.9.5 3.9 1.5 1 1 1.6 2.3 1.8 3.8zM22.5 10.5c-.2 1.5-.8 2.8-1.8 3.8-1 1-2.3 1.5-3.9 1.5h-1.3v2.5h1.3c.5 0 .9.4.9.9s-.4.9-.9.9h-2.3c-.5 0-.9-.4-.9-.9V7.5c0-.5.4-.9.9-.9h4.8c1.6 0 2.9.5 3.9 1.5 1 1 1.6 2.3 1.8 3.8z" fill="#fff" />
+          <path d="M8.5 8.5h-2c-.5 0-.9.4-.9.9v4.8c0 .5.4.9.9.9h2c.5 0 .9-.4.9-.9V9.4c0-.5-.4-.9-.9-.9zM18.5 8.5h-2c-.5 0-.9.4-.9.9v4.8c0 .5.4.9.9.9h2c.5 0 .9-.4.9-.9V9.4c0-.5-.4-.9-.9-.9z" fill="#009CDE" />
+        </svg>
       )
-    case 'instapay':
-      return (
-        <div className={`h-10 w-24 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center ${className}`}>
-          <span className="text-white font-semibold text-sm">InstaPay</span>
-        </div>
-      )
-    case 'vodafone':
-      return (
-        <img src="/images/social/vodafone.jpg" alt="Vodafone Cash" className={`h-10 w-24 object-cover rounded-lg border border-white/10 ${className}`} />
-      )
+    
     case 'visa':
       return (
-        <div className={`h-10 w-20 rounded-lg bg-[#1434CB] flex items-center justify-center ${className}`}>
-          <span className="text-white font-bold text-base">VISA</span>
-        </div>
+        <svg width={size} height={size} viewBox="0 0 32 32" className={iconClass} aria-hidden="true">
+          <rect width="32" height="32" rx="4" fill="#1434CB" />
+          <path d="M13.5 12.5l-2.8 7h-2l2-5.2-1.2-1.8h-2L7.2 19.5h-2l1.4-7h2.4l-.9 4.5 1.1 1.8h1.8l1.5-6.3h2z" fill="#fff" />
+          <path d="M18.5 12.5h-1.8l-1.7 7h1.8l.3-1h2.2l.2 1h1.6l-1.4-7zm-1.1 4.5l.7-1.8.2-.5.4 2.3h-1.3z" fill="#fff" />
+          <path d="M24.5 12.5h-1.7c-.3 0-.5.2-.6.4l-2.9 6.6h2l.4-1h2.5l.2 1h1.5l-1.4-7zm-2.2 4.5l.9-2.4.5 1.2-.2.6h-1.2l.1.1.5.5h1.5l-.6-1z" fill="#fff" />
+          <path d="M9.5 12.5H7.7l-1.4 7h1.8l1.4-7z" fill="#FAA61A" />
+        </svg>
       )
+    
+    case 'vodafone':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" className={iconClass} aria-hidden="true">
+          <rect width="32" height="32" rx="4" fill="#E60000" />
+          <path d="M16 10c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 9c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z" fill="#fff" />
+          <circle cx="16" cy="16" r="2" fill="#fff" />
+          <path d="M13 13h6v6h-6v-6zm1 1v4h4v-4h-4z" fill="#E60000" />
+        </svg>
+      )
+    
+    case 'instapay':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" className={iconClass} aria-hidden="true">
+          <rect width="32" height="32" rx="4" fill="#00A8E8" />
+          <path d="M10 11h12c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H10c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2zm0 1c-.6 0-1 .4-1 1v6c0 .6.4 1 1 1h12c.6 0 1-.4 1-1v-6c0-.6-.4-1-1-1H10z" fill="#fff" />
+          <circle cx="16" cy="16" r="2.5" fill="#fff" />
+          <path d="M14 14h4v4h-4v-4zm1 1v2h2v-2h-2z" fill="#00A8E8" />
+        </svg>
+      )
+    
     case 'cod':
       return (
-        <div className={`h-8 w-16 rounded-lg bg-zinc-700/80 border border-white/10 flex items-center justify-center ${className}`}>
-          <span className="text-xs font-semibold text-white">COD</span>
-        </div>
+        <svg width={size} height={size} viewBox="0 0 32 32" className={iconClass} aria-hidden="true">
+          <rect width="32" height="32" rx="4" fill="#666" />
+          <circle cx="16" cy="16" r="6" fill="none" stroke="#fff" strokeWidth="1.5" />
+          <path d="M12 16l2 2 4-4" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="9" y="22" width="14" height="2" rx="1" fill="#fff" />
+        </svg>
       )
+    
     default:
       return null
   }
@@ -76,7 +103,7 @@ export function PaymentMethodOption({
         disabled={comingSoon}
         aria-label={`Select ${label}`}
       />
-      <PaymentIcon method={method} />
+      <PaymentIcon method={method} size={40} />
       <div className="flex-1">
         <div className="font-semibold text-bone flex items-center gap-2">
           {label}
