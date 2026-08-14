@@ -6,7 +6,15 @@
 !web
 !web/**
 !README.md
-# Root app (for Vercel build when Root Directory not set) – allow Admin pages so build passes
+!public
+!public/**
+!index.html
+!package.json
+!package-lock.json
+!tsconfig.json
+!tailwind.config.js
+!postcss.config.js
+!vercel.json
 !src
 !src/**
 
