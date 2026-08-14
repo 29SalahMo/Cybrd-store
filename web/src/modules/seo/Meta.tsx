@@ -24,7 +24,7 @@ export default function Meta({ title, description, image, url }: Props) {
       return `${baseUrl}/${img}`
     }
     
-    const absoluteImage = getAbsoluteImageUrl(image || '/og-image.jpeg')
+    const absoluteImage = getAbsoluteImageUrl(image || '/og-image.jpeg?v=2026')
     
     const set = (name: string, content?: string) => {
       if (!content) return
