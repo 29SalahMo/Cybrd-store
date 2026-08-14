@@ -57,8 +57,8 @@ export default function Meta({ title, description, image, url }: Props) {
       setProperty('og:image', absoluteImage)
       setProperty('og:image:url', absoluteImage)
       setProperty('og:image:secure_url', absoluteImage)
-      setProperty('og:image:width', '1280')
-      setProperty('og:image:height', '698')
+      setProperty('og:image:width', '1024')
+      setProperty('og:image:height', '497')
       setProperty('og:image:type', 'image/jpeg')
     }
     setProperty('og:url', fullUrl)
