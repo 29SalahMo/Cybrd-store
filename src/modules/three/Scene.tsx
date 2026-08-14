@@ -3,29 +3,7 @@ import { Float, useGLTF } from '@react-three/drei'
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 
-function SpinningLogo() {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const texture = useMemo(() => {
-    const tex = new THREE.TextureLoader().load('/logo.png')
-    tex.colorSpace = THREE.SRGBColorSpace
-    tex.anisotropy = 8
-    return tex
-  }, [])
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime()
-    if (!meshRef.current) return
-    meshRef.current.rotation.y = t * 0.6
-    meshRef.current.position.y = 1.2 + Math.sin(t * 1.2) * 0.06
-  })
-  return (
-    <Float speed={1.2} floatIntensity={0.6} rotationIntensity={0.2}>
-      <mesh ref={meshRef} position={[-2.3, 1.05, -1.5]} renderOrder={10}>
-        <icosahedronGeometry args={[0.3, 0]} />
-        <meshStandardMaterial map={texture} metalness={0.35} roughness={0.35} emissive={new THREE.Color('#00E5FF')} emissiveIntensity={0.75} />
-      </mesh>
-    </Float>
-  )
-}
+
 
 // Enable Three.js resource cache globally
 THREE.Cache.enabled = true
@@ -141,12 +119,12 @@ export default function Scene({ children }: { children?: React.ReactNode }) {
         >
           <Canvas 
             camera={{ position: [0, 0.6, 3.6], fov: 50 }} 
-            dpr={[1, 2]}
+            dpr={Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 1.5)}
+            gl={{ powerPreference: 'high-performance', antialias: true, alpha: true }}
             style={{ position: 'absolute', zIndex: -9999 }}
           >
             <Suspense fallback={null}>
               <BackgroundHoodie scrollY={scrollY} />
-              <SpinningLogo />
               <ColorLights />
             </Suspense>
           </Canvas>
