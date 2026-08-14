@@ -1,5 +1,16 @@
 {
   "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)\\.(glb|mp4|png|jpeg|jpg|ico|svg|json|webp)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
   "routes": [
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }

@@ -27,6 +27,9 @@ function SpinningLogo() {
   )
 }
 
+// Enable Three.js resource cache globally
+THREE.Cache.enabled = true
+
 function HoodiePrimitive(props: { scale?: number, url?: string }) {
   const gltf = useGLTF(props.url ?? '/hoodie.glb')
   return <primitive object={gltf.scene} scale={props.scale ?? 1} />
@@ -39,17 +42,16 @@ function BackgroundHoodie({ scrollY }: { scrollY: number }) {
 
   useEffect(() => {
     let mounted = true
-    // 1) Try local hoodie.glb
-    fetch('/hoodie.glb', { method: 'GET' })
+    // Use HEAD request to check model presence without downloading 53MB payload twice!
+    fetch('/hoodie.glb', { method: 'HEAD' })
       .then((r) => {
         if (!mounted) return
         const ct = r.headers.get('content-type') || ''
-        const isModel = ct.includes('model') || ct.includes('application/octet-stream')
         const isHtml = ct.includes('text/html')
-        const okLocal = r.ok && isModel && !isHtml
+        const okLocal = r.ok && !isHtml
         setHasHoodie(okLocal)
         if (okLocal) return
-        // 2) If not local, try remote URL config
+        // Fallback: remote URL config
         return fetch('/model-source.json').then(async (cfg) => {
           if (!cfg.ok) return
           const json = await cfg.json().catch(() => null)
