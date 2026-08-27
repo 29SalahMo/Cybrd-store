@@ -6,6 +6,8 @@ import Footer from './layout/Footer'
 import IntroGate from './intro/IntroGate'
 import { WishlistProvider } from './wishlist/WishlistContext'
 import { AuthProvider } from './auth/AuthContext'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 // Lazy load routes for code splitting
 const Home = lazy(() => import('./pages/Home'))
 const Shop = lazy(() => import('./pages/Shop'))
@@ -102,6 +104,8 @@ export default function App() {
           <Footer />
           <ToastViewport />
         </div>
+        <Analytics />
+        <SpeedInsights />
         </ErrorBoundary>
         </GlobalErrorHandler>
       </ToastProvider>
